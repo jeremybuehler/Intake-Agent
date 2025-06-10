@@ -6,6 +6,7 @@ import { ApiTester } from "@/components/api-tester";
 import { JobLogs } from "@/components/job-logs";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
 import { SystemDashboard } from "@/components/system-dashboard";
+import { TwilioConfig } from "@/components/twilio-config";
 import { api } from "@/lib/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
