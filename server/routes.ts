@@ -29,6 +29,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const processingTime = Date.now() - startTime;
       
+      // Record successful job processing metrics
+      simpleMonitoring.recordJobSuccess(processingTime, aiResult.confidence);
+      
       // Create job record for storage
       const jobRecord = {
         job_id: jobId,
@@ -81,6 +84,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Intake processing error:", error);
       
+      // Record failed job processing
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      simpleMonitoring.recordJobError(errorMessage);
+      
       if (error instanceof z.ZodError) {
         res.status(400).json({
           error: "Invalid input data",
@@ -89,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({
           error: "Internal server error during job processing",
-          message: error instanceof Error ? error.message : "Unknown error occurred"
+          message: errorMessage
         });
       }
     }
