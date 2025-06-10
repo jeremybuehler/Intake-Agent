@@ -5,7 +5,9 @@ import { Activity, BarChart3, CheckCircle, Zap } from "lucide-react";
 import { ApiTester } from "@/components/api-tester";
 import { JobLogs } from "@/components/job-logs";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
+import { SystemDashboard } from "@/components/system-dashboard";
 import { api } from "@/lib/api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Dashboard() {
   const { data: metrics } = useQuery({

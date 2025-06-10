@@ -341,6 +341,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Connection management endpoints
+  app.get("/api/system/health", async (req, res) => {
+    try {
+      const health = await performHealthCheck();
+      res.json({
+        status: health.overall ? "healthy" : "degraded",
+        timestamp: new Date().toISOString(),
+        services: {
+          database: health.database ? "connected" : "disconnected",
+          openai: health.openai ? "connected" : "disconnected",
+        },
+        config: {
+          endpoints: {
+            webhooks: appConfig.webhooks.enabled,
+            sms: appConfig.sms.enabled,
+            phone: appConfig.phone.enabled,
+          },
+          processing: {
+            timeout: appConfig.processing.timeoutMs,
+            retries: appConfig.processing.retryAttempts,
+          },
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        error: "Health check failed",
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
+  app.get("/api/system/connections", async (req, res) => {
+    try {
+      const status = connectionManager.getConnectionStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get connection status" });
+    }
+  });
+
+  app.post("/api/system/connections/database/reconnect", async (req, res) => {
+    try {
+      const success = await connectionManager.reconnectDatabase();
+      res.json({ 
+        success,
+        message: success ? "Database reconnected successfully" : "Database reconnection failed",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reconnect database" });
+    }
+  });
+
+  app.post("/api/system/connections/openai/reconnect", async (req, res) => {
+    try {
+      const success = connectionManager.reconnectOpenAI();
+      res.json({ 
+        success,
+        message: success ? "OpenAI reconnected successfully" : "OpenAI reconnection failed",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reconnect OpenAI" });
+    }
+  });
+
+  app.get("/api/system/config", async (req, res) => {
+    try {
+      // Return safe configuration (no secrets)
+      res.json({
+        endpoints: {
+          webhooks: {
+            enabled: appConfig.webhooks.enabled,
+            rateLimit: appConfig.webhooks.rateLimit,
+          },
+          sms: {
+            enabled: appConfig.sms.enabled,
+            provider: appConfig.sms.provider,
+            webhookPath: appConfig.sms.webhookPath,
+            rateLimit: appConfig.sms.rateLimit,
+          },
+          phone: {
+            enabled: appConfig.phone.enabled,
+            provider: appConfig.phone.provider,
+            webhookPath: appConfig.phone.webhookPath,
+            transcriptionEnabled: appConfig.phone.transcriptionEnabled,
+            rateLimit: appConfig.phone.rateLimit,
+          },
+        },
+        processing: {
+          timeoutMs: appConfig.processing.timeoutMs,
+          retryAttempts: appConfig.processing.retryAttempts,
+          batchSize: appConfig.processing.batchSize,
+          enableFallback: appConfig.processing.enableFallback,
+        },
+        monitoring: {
+          enabled: appConfig.monitoring.enabled,
+          logLevel: appConfig.monitoring.logLevel,
+          metricsRetentionDays: appConfig.monitoring.metricsRetentionDays,
+        },
+        openai: {
+          model: appConfig.openai.model,
+          timeout: appConfig.openai.timeout,
+          maxRetries: appConfig.openai.maxRetries,
+          temperature: appConfig.openai.temperature,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get configuration" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
