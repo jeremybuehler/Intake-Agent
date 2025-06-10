@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
 import { enrichJobData } from "./openai";
 import { z } from "zod";
+import { connectionManager } from "./connection-manager";
+import { appConfig, performHealthCheck } from "./config";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
