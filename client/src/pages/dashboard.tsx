@@ -27,7 +27,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold text-gray-900">JiveAI</h1>
-                  <p className="text-xs text-gray-500">AI Intake Agent</p>
+                  <p className="text-xs text-gray-500">Intake Agent</p>
                 </div>
               </div>
             </div>
@@ -99,7 +99,7 @@ export default function Dashboard() {
             {/* System Overview */}
             <section id="overview" className="mb-12">
               <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Intake Agent</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Intake Agent</h1>
                 <p className="text-lg text-gray-600">Headless service for processing and enriching field service job data using AI intelligence</p>
               </div>
 
@@ -148,7 +148,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <h3 className="text-sm font-medium text-gray-900">AI Success Rate</h3>
+                        <h3 className="text-sm font-medium text-gray-900">Success Rate</h3>
                         <p className="text-2xl font-semibold text-purple-600">
                           {metrics?.avgConfidence ? `${metrics.avgConfidence}%` : "N/A"}
                         </p>
@@ -174,7 +174,7 @@ export default function Dashboard() {
                       <div className="w-16 h-16 bg-purple-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
                         <Zap className="w-8 h-8 text-purple-600" />
                       </div>
-                      <h3 className="font-medium text-gray-900">AI Processing</h3>
+                      <h3 className="font-medium text-gray-900">Processing</h3>
                       <p className="text-sm text-gray-500 mt-1">GPT-4 analysis & enrichment</p>
                     </div>
                     <div className="text-center">
@@ -202,7 +202,7 @@ export default function Dashboard() {
                         <Badge className="bg-green-100 text-green-800">POST</Badge>
                         <code className="text-lg font-mono text-gray-900">/api/intake</code>
                       </div>
-                      <p className="text-gray-600 mt-2">Process and enrich raw job data using AI intelligence</p>
+                      <p className="text-gray-600 mt-2">Process and enrich raw job data using intelligence</p>
                     </div>
                     
                     <div className="p-6">

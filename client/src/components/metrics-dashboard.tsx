@@ -86,7 +86,7 @@ export function MetricsDashboard() {
               <Progress value={Math.min(100, (3000 - metrics.avgProcessingTime) / 30)} className="w-full" />
               
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-500">AI Processing Accuracy</span>
+                <span className="text-sm font-medium text-gray-500">Processing Accuracy</span>
                 <span className="text-sm font-semibold text-gray-900">
                   {metrics.avgConfidence ? `${metrics.avgConfidence}%` : "N/A"}
                 </span>

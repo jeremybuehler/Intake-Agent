@@ -67,7 +67,7 @@ export function ApiTester() {
       <Card>
         <CardHeader>
           <CardTitle>Test Intake Endpoint</CardTitle>
-          <p className="text-gray-600">Send sample job data to test the AI enrichment process</p>
+          <p className="text-gray-600">Send sample job data to test the enrichment process</p>
         </CardHeader>
         
         <CardContent>
