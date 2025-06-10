@@ -18,6 +18,8 @@ export function ApiTester() {
   "preferred_time": "ASAP",
   "source": "Webhook"
 }`);
+
+  const [selectedEndpoint, setSelectedEndpoint] = useState("/api/intake");
   const [response, setResponse] = useState<JobRecord | null>(null);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);

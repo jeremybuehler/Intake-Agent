@@ -144,13 +144,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Parse SMS content for customer info and job details
-      const lines = message.split('\n').map(line => line.trim()).filter(Boolean);
+      const lines = message.split('\n').map((line: string) => line.trim()).filter(Boolean);
       
       // Try to extract customer name from first line or use phone as fallback
       const customerName = lines[0]?.match(/^[A-Za-z\s]+$/) ? lines[0] : `Customer ${phone}`;
       
       // Extract address - look for lines with address patterns
-      const addressLine = lines.find(line => 
+      const addressLine = lines.find((line: string) => 
         /\d+.*(?:st|nd|rd|th|street|ave|avenue|rd|road|dr|drive|blvd|boulevard|way|ln|lane)/i.test(line) ||
         /\d{5}/.test(line) // ZIP code pattern
       );

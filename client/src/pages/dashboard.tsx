@@ -204,13 +204,13 @@ export default function Dashboard() {
                       </div>
                       <p className="text-gray-600 mt-2">Process and enrich raw job data using AI intelligence</p>
                     </div>
-                  
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-3">Request Body</h4>
-                        <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                          <pre className="text-sm text-gray-100 font-mono">{`{
+                    
+                    <div className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">Request Body</h4>
+                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm text-gray-100 font-mono">{`{
   "customer_name": "John Smith",
   "customer_phone": "(555) 123-4567",
   "customer_email": "john@example.com",
@@ -219,13 +219,13 @@ export default function Dashboard() {
   "preferred_time": "Tomorrow morning",
   "source": "Webhook"
 }`}</pre>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-3">Response</h4>
-                        <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                          <pre className="text-sm text-gray-100 font-mono">{`{
+                        
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">Response</h4>
+                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm text-gray-100 font-mono">{`{
   "job_id": "job_2024_001247",
   "customer": {
     "name": "John Smith",
@@ -248,12 +248,91 @@ export default function Dashboard() {
   "submitted_at": "2024-01-15T10:30:00Z",
   "status": "pending_intake"
 }`}</pre>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                {/* SMS Intake Endpoint */}
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                      <div className="flex items-center space-x-3">
+                        <Badge className="bg-blue-100 text-blue-800">POST</Badge>
+                        <code className="text-lg font-mono text-gray-900">/api/intake/sms</code>
+                      </div>
+                      <p className="text-gray-600 mt-2">Convert SMS messages to job records (Twilio webhook compatible)</p>
+                    </div>
+                    
+                    <div className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">Twilio SMS Webhook</h4>
+                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm text-gray-100 font-mono">{`{
+  "From": "+15551234567",
+  "Body": "John Smith\\n123 Oak Street\\nAC not working, very hot",
+  "To": "+15559876543"
+}`}</pre>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">TwiML Response</h4>
+                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm text-gray-100 font-mono">{`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>Thank you! Your service request has been received and assigned job ID: sms_2024_001248. Our team will contact you shortly.</Message>
+</Response>`}</pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Phone Call Intake Endpoint */}
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                      <div className="flex items-center space-x-3">
+                        <Badge className="bg-purple-100 text-purple-800">POST</Badge>
+                        <code className="text-lg font-mono text-gray-900">/api/intake/call</code>
+                      </div>
+                      <p className="text-gray-600 mt-2">Convert phone call transcriptions to job records (IVR compatible)</p>
+                    </div>
+                    
+                    <div className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">Call Webhook</h4>
+                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm text-gray-100 font-mono">{`{
+  "From": "+15551234567",
+  "TranscriptionText": "Hi, this is Sarah Johnson. My heater stopped working at 456 Oak Avenue. It's getting very cold in here.",
+  "CallSid": "CA123456789",
+  "Caller": "Sarah Johnson"
+}`}</pre>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">TwiML Response</h4>
+                          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm text-gray-100 font-mono">{`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="alice">Thank you for calling. Your service request has been recorded as job ID call_2024_001249. We will contact you shortly to schedule your appointment.</Say>
+  <Hangup/>
+</Response>`}</pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </section>
 
             <ApiTester />
