@@ -30,7 +30,7 @@ export const enhancedConfigSchema = z.object({
 
   // OpenAI configuration with fallback options
   openai: z.object({
-    apiKey: z.string().min(1),
+    apiKey: z.string().default(""),
     model: z.string().default("gpt-4o"),
     fallbackModel: z.string().default("gpt-3.5-turbo"),
     timeout: z.number().default(30000),

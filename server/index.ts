@@ -43,7 +43,7 @@ app.use((req, res, next) => {
     await connectionManager.initialize();
     log("Connection manager initialized successfully");
   } catch (error) {
-    log("Failed to initialize connection manager:", error);
+    log("Failed to initialize connection manager:", String(error));
   }
 
   const server = await registerRoutes(app);
