@@ -1,4 +1,4 @@
-import { users, jobRecords, type User, type InsertUser, type DbJobRecord, type InsertJobRecord } from "@shared/schema";
+import { users, jobRecords, twilioConfig, type User, type InsertUser, type DbJobRecord, type InsertJobRecord, type TwilioConfig, type InsertTwilioConfig } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -18,6 +18,12 @@ export interface IStorage {
     serviceTypeDistribution: Record<string, number>;
     urgencyDistribution: Record<string, number>;
   }>;
+
+  // Twilio Configuration methods
+  getTwilioConfig(): Promise<TwilioConfig | undefined>;
+  createTwilioConfig(config: InsertTwilioConfig): Promise<TwilioConfig>;
+  updateTwilioConfig(id: number, config: Partial<InsertTwilioConfig>): Promise<TwilioConfig | undefined>;
+  deleteTwilioConfig(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -106,6 +112,45 @@ export class DatabaseStorage implements IStorage {
       serviceTypeDistribution,
       urgencyDistribution
     };
+  }
+
+  // Twilio Configuration methods
+  async getTwilioConfig(): Promise<TwilioConfig | undefined> {
+    const [config] = await db.select().from(twilioConfig).where(eq(twilioConfig.is_active, true));
+    return config || undefined;
+  }
+
+  async createTwilioConfig(config: InsertTwilioConfig): Promise<TwilioConfig> {
+    // Deactivate existing configs
+    await db.update(twilioConfig).set({ is_active: false });
+    
+    const [newConfig] = await db
+      .insert(twilioConfig)
+      .values({
+        ...config,
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .returning();
+    return newConfig;
+  }
+
+  async updateTwilioConfig(id: number, config: Partial<InsertTwilioConfig>): Promise<TwilioConfig | undefined> {
+    const [updatedConfig] = await db
+      .update(twilioConfig)
+      .set({
+        ...config,
+        updated_at: new Date(),
+      })
+      .where(eq(twilioConfig.id, id))
+      .returning();
+    return updatedConfig || undefined;
+  }
+
+  async deleteTwilioConfig(id: number): Promise<boolean> {
+    const result = await db.delete(twilioConfig).where(eq(twilioConfig.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 }
 
