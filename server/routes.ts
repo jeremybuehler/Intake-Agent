@@ -6,6 +6,9 @@ import { enrichJobData } from "./openai";
 import { z } from "zod";
 import { connectionManager } from "./connection-manager";
 import { appConfig, performHealthCheck } from "./config";
+import { alertingSystem } from "./alerting";
+import { metricsCollector } from "./metrics";
+import { configManager } from "./enhanced-config";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -450,6 +453,251 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to get configuration" });
+    }
+  });
+
+  // Enhanced monitoring and alerting endpoints
+  app.get("/api/monitoring/alerts", async (req, res) => {
+    try {
+      const { type, service, resolved, limit = 50, since } = req.query;
+      
+      const options: any = { limit: parseInt(limit as string) };
+      if (type) options.type = type;
+      if (service) options.service = service;
+      if (resolved !== undefined) options.resolved = resolved === 'true';
+      if (since) options.since = new Date(since as string);
+      
+      const alerts = alertingSystem.getAlerts(options);
+      res.json(alerts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch alerts" });
+    }
+  });
+
+  app.get("/api/monitoring/alerts/active", async (req, res) => {
+    try {
+      const activeAlerts = alertingSystem.getActiveAlerts();
+      res.json(activeAlerts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active alerts" });
+    }
+  });
+
+  app.post("/api/monitoring/alerts/:alertId/resolve", async (req, res) => {
+    try {
+      const { alertId } = req.params;
+      const success = alertingSystem.resolveAlert(alertId);
+      
+      if (success) {
+        res.json({ success: true, message: "Alert resolved successfully" });
+      } else {
+        res.status(404).json({ error: "Alert not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to resolve alert" });
+    }
+  });
+
+  app.get("/api/monitoring/metrics/system", async (req, res) => {
+    try {
+      const systemMetrics = await metricsCollector.getSystemMetrics();
+      res.json(systemMetrics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch system metrics" });
+    }
+  });
+
+  app.get("/api/monitoring/metrics/performance", async (req, res) => {
+    try {
+      const { hours = 24 } = req.query;
+      const performanceHistory = metricsCollector.getPerformanceHistory(parseInt(hours as string));
+      res.json(performanceHistory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch performance metrics" });
+    }
+  });
+
+  app.get("/api/monitoring/metrics/endpoints", async (req, res) => {
+    try {
+      const endpointStats = metricsCollector.getEndpointStats();
+      res.json(endpointStats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch endpoint statistics" });
+    }
+  });
+
+  app.get("/api/monitoring/health-score", async (req, res) => {
+    try {
+      const healthScore = metricsCollector.getHealthScore();
+      res.json(healthScore);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to calculate health score" });
+    }
+  });
+
+  app.get("/api/monitoring/stats", async (req, res) => {
+    try {
+      const alertStats = alertingSystem.getSystemStats();
+      const systemMetrics = await metricsCollector.getSystemMetrics();
+      const healthScore = metricsCollector.getHealthScore();
+      
+      res.json({
+        alerts: alertStats,
+        performance: {
+          totalJobs: systemMetrics.totalJobs,
+          avgProcessingTime: systemMetrics.avgProcessingTime,
+          avgConfidence: systemMetrics.avgConfidence,
+          errorRate: systemMetrics.errorRate,
+          throughputPerHour: systemMetrics.throughputPerHour,
+        },
+        health: healthScore,
+        uptime: systemMetrics.systemUptime,
+        resources: {
+          memory: systemMetrics.memoryUsage,
+          cpu: systemMetrics.cpuUsage,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch monitoring statistics" });
+    }
+  });
+
+  // Enhanced configuration management endpoints
+  app.get("/api/config/enhanced", async (req, res) => {
+    try {
+      const config = configManager.getConfig();
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch enhanced configuration" });
+    }
+  });
+
+  app.put("/api/config/enhanced", async (req, res) => {
+    try {
+      const updates = req.body;
+      const success = configManager.updateConfig(updates);
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: "Configuration updated successfully",
+          config: configManager.getConfig(),
+        });
+      } else {
+        res.status(400).json({ error: "Failed to update configuration" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update configuration" });
+    }
+  });
+
+  app.post("/api/config/validate", async (req, res) => {
+    try {
+      const configToValidate = req.body;
+      const validation = configManager.validateConfiguration(configToValidate);
+      res.json(validation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to validate configuration" });
+    }
+  });
+
+  app.post("/api/config/reset", async (req, res) => {
+    try {
+      const success = configManager.resetToDefaults();
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: "Configuration reset to defaults",
+          config: configManager.getConfig(),
+        });
+      } else {
+        res.status(500).json({ error: "Failed to reset configuration" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reset configuration" });
+    }
+  });
+
+  app.get("/api/config/export", async (req, res) => {
+    try {
+      const configJson = configManager.exportConfig();
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename="jiveai-config.json"');
+      res.send(configJson);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to export configuration" });
+    }
+  });
+
+  app.post("/api/config/import", async (req, res) => {
+    try {
+      const { configJson } = req.body;
+      const success = configManager.importConfig(configJson);
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: "Configuration imported successfully",
+          config: configManager.getConfig(),
+        });
+      } else {
+        res.status(400).json({ error: "Failed to import configuration" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to import configuration" });
+    }
+  });
+
+  // Alert rules management
+  app.get("/api/monitoring/alert-rules", async (req, res) => {
+    try {
+      const rules = alertingSystem.getAlertRules();
+      res.json(rules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch alert rules" });
+    }
+  });
+
+  app.put("/api/monitoring/alert-rules/:ruleId", async (req, res) => {
+    try {
+      const { ruleId } = req.params;
+      const updates = req.body;
+      const success = alertingSystem.updateAlertRule(ruleId, updates);
+      
+      if (success) {
+        res.json({ success: true, message: "Alert rule updated successfully" });
+      } else {
+        res.status(404).json({ error: "Alert rule not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update alert rule" });
+    }
+  });
+
+  app.post("/api/monitoring/alert-rules", async (req, res) => {
+    try {
+      const ruleData = req.body;
+      const newRule = alertingSystem.addCustomRule(ruleData);
+      res.status(201).json(newRule);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create alert rule" });
+    }
+  });
+
+  app.delete("/api/monitoring/alert-rules/:ruleId", async (req, res) => {
+    try {
+      const { ruleId } = req.params;
+      const success = alertingSystem.removeAlertRule(ruleId);
+      
+      if (success) {
+        res.json({ success: true, message: "Alert rule deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Alert rule not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete alert rule" });
     }
   });
 
