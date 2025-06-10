@@ -1,0 +1,97 @@
+Here’s your updated **Replit Agent Prompt** for building a **Headless AI Intake Agent** (no UI) — designed to integrate directly with FSMs, CRMs, email parsers, or homegrown tools from real-world service providers:
+
+---
+
+## 🧠 **Replit Agent Prompt: Headless AI Intake Agent (No UI)**
+
+````
+You are a backend-focused AI developer agent tasked with building a headless "AI Intake Agent" for BuehlerData’s Field Service Automation Suite.
+
+This Intake Agent does not have a frontend. Instead, it connects to existing customer data sources such as FSMs, CRMs, databases, or third-party intake systems (e.g., email or webhook). It receives unstructured or semi-structured job data and returns a clean, validated, AI-enriched `JobRecord` that can be handed off to the Smart Dispatch Assistant.
+
+---
+
+✅ REQUIREMENTS
+
+📥 Supported Input Sources (MVP):
+- Webhook (POST JSON to `/api/intake`)
+- JSON file upload via CLI or test script
+- Optional email parser stub (SendGrid or Postmark compatible)
+
+🧠 AI ENRICHMENT:
+- Use OpenAI GPT-4 to:
+  - Summarize job descriptions into standard issue categories
+  - Tag each job with `issue_type`, `urgency`, and `potential_parts`
+  - Flag jobs with missing fields or unclear descriptions
+
+🧾 Output: `JobRecord` Schema
+```ts
+{
+  job_id: string,
+  customer: {
+    name: string,
+    phone: string,
+    email?: string,
+    address: string
+  },
+  service_type: "AC Repair" | "Install" | "Maintenance" | "Heating" | "Other",
+  description: string,
+  ai_summary: string,
+  issue_type: string,
+  urgency: "low" | "medium" | "high",
+  potential_parts?: string[],
+  preferred_time?: string,
+  source: "Webhook" | "Email" | "FSM API" | "Manual Upload",
+  submitted_at: string,
+  status: "pending_intake"
+}
+````
+
+🛠 TECH STACK:
+
+* Node.js + Express (TypeScript preferred)
+* Optional use of LangChain or Semantic Kernel for GPT orchestration
+* Store output in JSON file or in-memory for demo purposes
+
+---
+
+🚀 MVP FUNCTIONALITY:
+
+1. Accept POST requests to `/api/intake` with raw job data
+2. Normalize and validate required fields
+3. Use GPT-4 to summarize and enrich with issue tags, urgency, potential parts
+4. Return structured `JobRecord` response to client or dispatch queue
+5. Log processed jobs to console or store in `/data/intake_log.json`
+
+---
+
+🔜 FUTURE EXPANSIONS:
+
+* FSM/CRM API connectors (ServiceTitan, Jobber, Airtable, etc.)
+* Email-to-job converter using inbound email webhooks
+* Filesystem watcher for batch job imports
+* Integration with BuehlerData Smart Dispatch Agent
+
+---
+
+📄 DELIVERABLES:
+
+* `intake-agent.ts` or `intake-agent.js` service with POST handler
+* `JobRecord` type definition or schema validator
+* Sample webhook payloads for local testing
+* OpenAI integration with one basic enrichment prompt
+* README with setup + example POST script
+
+```
+
+---
+
+### 🧩 Want to keep moving?
+
+I can now:
+- Draft the `JobRecord` schema as a `.ts` file
+- Provide a Replit-friendly test script (`curl` or Postman format)
+- Help you write the first OpenAI prompt to summarize and classify intake descriptions
+
+Let me know what you want next.
+```
