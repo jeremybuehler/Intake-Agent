@@ -94,6 +94,17 @@ export default function Dashboard() {
                   </li>
                 </ul>
               </div>
+              <div className="pb-4">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuration</h3>
+                <ul className="mt-2 space-y-1">
+                  <li>
+                    <a href="#twilio" className="text-gray-700 hover:text-primary hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                      <Zap className="text-gray-400 group-hover:text-primary mr-3 h-4 w-4" />
+                      Twilio Integration
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </nav>
           </aside>
 
@@ -341,6 +352,15 @@ export default function Dashboard() {
             <ApiTester />
             <JobLogs />
             <MetricsDashboard />
+            
+            {/* Twilio Configuration Section */}
+            <section id="twilio" className="mb-12">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Twilio Integration</h2>
+                <p className="text-gray-600">Configure Twilio API credentials for SMS, voice calls, and transcription services</p>
+              </div>
+              <TwilioConfig />
+            </section>
           </main>
         </div>
       </div>

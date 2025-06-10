@@ -113,10 +113,21 @@ export function TwilioConfig() {
         fallback_url: data.fallback_url || undefined,
         status_callback_url: data.status_callback_url || undefined,
       };
-      return apiRequest("/api/twilio/config", {
+      
+      const response = await fetch("/api/twilio/config", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(cleanData),
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to save configuration");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/twilio/config"] });
@@ -136,9 +147,16 @@ export function TwilioConfig() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/twilio/config/${id}`, {
+      const response = await fetch(`/api/twilio/config/${id}`, {
         method: "DELETE",
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete configuration");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/twilio/config"] });
