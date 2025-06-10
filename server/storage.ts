@@ -1,4 +1,6 @@
 import { users, jobRecords, type User, type InsertUser, type DbJobRecord, type InsertJobRecord } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -18,75 +20,67 @@ export interface IStorage {
   }>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private jobRecords: Map<string, DbJobRecord>;
-  private currentUserId: number;
-  private currentJobId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.jobRecords = new Map();
-    this.currentUserId = 1;
-    this.currentJobId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async createJobRecord(jobRecord: InsertJobRecord): Promise<DbJobRecord> {
-    const id = this.currentJobId++;
-    const record: DbJobRecord = { 
-      id,
-      job_id: jobRecord.job_id,
-      customer_name: jobRecord.customer_name,
-      customer_phone: jobRecord.customer_phone,
-      customer_email: jobRecord.customer_email ?? null,
-      customer_address: jobRecord.customer_address,
-      service_type: jobRecord.service_type,
-      description: jobRecord.description,
-      ai_summary: jobRecord.ai_summary,
-      issue_type: jobRecord.issue_type,
-      urgency: jobRecord.urgency,
-      potential_parts: jobRecord.potential_parts ?? null,
-      preferred_time: jobRecord.preferred_time ?? null,
-      source: jobRecord.source,
-      submitted_at: jobRecord.submitted_at,
-      status: jobRecord.status || "pending_intake",
-      ai_confidence: jobRecord.ai_confidence ?? null,
-      processing_time_ms: jobRecord.processing_time_ms ?? null
-    };
-    this.jobRecords.set(jobRecord.job_id, record);
+    const [record] = await db
+      .insert(jobRecords)
+      .values({
+        job_id: jobRecord.job_id,
+        customer_name: jobRecord.customer_name,
+        customer_phone: jobRecord.customer_phone,
+        customer_email: jobRecord.customer_email ?? null,
+        customer_address: jobRecord.customer_address,
+        service_type: jobRecord.service_type,
+        description: jobRecord.description,
+        ai_summary: jobRecord.ai_summary,
+        issue_type: jobRecord.issue_type,
+        urgency: jobRecord.urgency,
+        potential_parts: jobRecord.potential_parts ?? null,
+        preferred_time: jobRecord.preferred_time ?? null,
+        source: jobRecord.source,
+        submitted_at: jobRecord.submitted_at,
+        status: jobRecord.status || "pending_intake",
+        ai_confidence: jobRecord.ai_confidence ?? null,
+        processing_time_ms: jobRecord.processing_time_ms ?? null
+      })
+      .returning();
     return record;
   }
 
   async getJobRecord(jobId: string): Promise<DbJobRecord | undefined> {
-    return this.jobRecords.get(jobId);
+    const [record] = await db.select().from(jobRecords).where(eq(jobRecords.job_id, jobId));
+    return record || undefined;
   }
 
   async getJobRecords(limit = 50): Promise<DbJobRecord[]> {
-    const records = Array.from(this.jobRecords.values())
-      .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
-      .slice(0, limit);
+    const records = await db
+      .select()
+      .from(jobRecords)
+      .orderBy(desc(jobRecords.submitted_at))
+      .limit(limit);
     return records;
   }
 
   async getJobMetrics() {
-    const records = Array.from(this.jobRecords.values());
+    const records = await db.select().from(jobRecords);
     const totalJobs = records.length;
     
     const avgProcessingTime = records
@@ -115,4 +109,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
