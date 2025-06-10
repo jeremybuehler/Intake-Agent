@@ -23,10 +23,10 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">BD</span>
+                  <span className="text-white font-bold text-sm">JI</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">BuehlerData</h1>
+                  <h1 className="text-lg font-semibold text-gray-900">JiveAI</h1>
                   <p className="text-xs text-gray-500">AI Intake Agent</p>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export default function Dashboard() {
                         <Activity className="w-8 h-8 text-blue-600" />
                       </div>
                       <h3 className="font-medium text-gray-900">Data Intake</h3>
-                      <p className="text-sm text-gray-500 mt-1">Webhooks, APIs, Email parsing</p>
+                      <p className="text-sm text-gray-500 mt-1">Webhooks, SMS, Phone/IVR, Email</p>
                     </div>
                     <div className="text-center">
                       <div className="w-16 h-16 bg-purple-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
@@ -193,15 +193,17 @@ export default function Dashboard() {
             <section id="api-docs" className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">API Reference</h2>
               
-              <Card className="mb-6">
-                <CardContent className="p-0">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex items-center space-x-3">
-                      <Badge className="bg-green-100 text-green-800">POST</Badge>
-                      <code className="text-lg font-mono text-gray-900">/api/intake</code>
+              <div className="grid grid-cols-1 gap-6">
+                {/* Main Intake Endpoint */}
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                      <div className="flex items-center space-x-3">
+                        <Badge className="bg-green-100 text-green-800">POST</Badge>
+                        <code className="text-lg font-mono text-gray-900">/api/intake</code>
+                      </div>
+                      <p className="text-gray-600 mt-2">Process and enrich raw job data using AI intelligence</p>
                     </div>
-                    <p className="text-gray-600 mt-2">Process and enrich raw job data using AI intelligence</p>
-                  </div>
                   
                   <div className="p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

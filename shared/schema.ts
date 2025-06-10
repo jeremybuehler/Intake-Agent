@@ -39,7 +39,7 @@ export const rawJobIntakeSchema = z.object({
   address: z.string().min(1, "Address is required"),
   description: z.string().min(1, "Job description is required"),
   preferred_time: z.string().optional(),
-  source: z.string().default("Webhook"),
+  source: z.enum(["Webhook", "SMS", "Phone Call", "Email", "FSM API", "Manual Upload"]).default("Webhook"),
 });
 
 // JobRecord output schema

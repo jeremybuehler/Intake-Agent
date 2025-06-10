@@ -50,7 +50,26 @@ export class MemStorage implements IStorage {
 
   async createJobRecord(jobRecord: InsertJobRecord): Promise<DbJobRecord> {
     const id = this.currentJobId++;
-    const record: DbJobRecord = { ...jobRecord, id };
+    const record: DbJobRecord = { 
+      id,
+      job_id: jobRecord.job_id,
+      customer_name: jobRecord.customer_name,
+      customer_phone: jobRecord.customer_phone,
+      customer_email: jobRecord.customer_email ?? null,
+      customer_address: jobRecord.customer_address,
+      service_type: jobRecord.service_type,
+      description: jobRecord.description,
+      ai_summary: jobRecord.ai_summary,
+      issue_type: jobRecord.issue_type,
+      urgency: jobRecord.urgency,
+      potential_parts: jobRecord.potential_parts ?? null,
+      preferred_time: jobRecord.preferred_time ?? null,
+      source: jobRecord.source,
+      submitted_at: jobRecord.submitted_at,
+      status: jobRecord.status || "pending_intake",
+      ai_confidence: jobRecord.ai_confidence ?? null,
+      processing_time_ms: jobRecord.processing_time_ms ?? null
+    };
     this.jobRecords.set(jobRecord.job_id, record);
     return record;
   }
