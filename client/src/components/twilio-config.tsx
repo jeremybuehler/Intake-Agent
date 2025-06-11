@@ -84,16 +84,16 @@ export function TwilioConfig() {
   const form = useForm<TwilioConfigForm>({
     resolver: zodResolver(twilioConfigSchema),
     defaultValues: {
-      account_sid: "",
+      account_sid: config?.account_sid || "",
       auth_token: "",
-      phone_number: "",
-      webhook_url: "",
-      sms_enabled: true,
-      voice_enabled: true,
-      transcription_enabled: true,
-      auto_response_enabled: true,
-      fallback_url: "",
-      status_callback_url: "",
+      phone_number: config?.phone_number || "",
+      webhook_url: config?.webhook_url || "",
+      sms_enabled: config?.sms_enabled || true,
+      voice_enabled: config?.voice_enabled || true,
+      transcription_enabled: config?.transcription_enabled || true,
+      auto_response_enabled: config?.auto_response_enabled || true,
+      fallback_url: config?.fallback_url || "",
+      status_callback_url: config?.status_callback_url || "",
     },
   });
 
@@ -246,11 +246,13 @@ export function TwilioConfig() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className="text-muted-foreground">Account SID</Label>
-                  <p className="font-mono">{config.account_sid}</p>
+                  <p className="font-mono text-blue-700 dark:text-blue-300">
+                    {config.account_sid ? `${config.account_sid.substring(0, 8)}...${config.account_sid.slice(-4)}` : 'Not configured'}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Phone Number</Label>
-                  <p className="font-mono">{config.phone_number}</p>
+                  <p className="font-mono text-green-700 dark:text-green-300">{config.phone_number || 'Not configured'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Created</Label>

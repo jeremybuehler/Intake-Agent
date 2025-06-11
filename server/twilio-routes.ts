@@ -9,7 +9,26 @@ export function registerTwilioRoutes(app: Express) {
   app.get("/api/twilio/config", async (req, res) => {
     try {
       const config = await storage.getTwilioConfig();
-      res.json(config || null);
+      
+      // If no config exists in database, show environment-based configuration
+      if (!config) {
+        const envConfig = {
+          account_sid: process.env.TWILIO_ACCOUNT_SID || null,
+          phone_number: process.env.TWILIO_PHONE_NUMBER || null,
+          webhook_url: null,
+          sms_enabled: false,
+          voice_enabled: false,
+          transcription_enabled: false,
+          auto_response_enabled: false,
+          fallback_url: null,
+          status_callback_url: null,
+          is_active: false,
+          source: "environment"
+        };
+        res.json(envConfig);
+      } else {
+        res.json(config);
+      }
     } catch (error) {
       console.error("Error fetching Twilio config:", error);
       res.status(500).json({ error: "Failed to fetch Twilio configuration" });
