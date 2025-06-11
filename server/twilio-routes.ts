@@ -3,6 +3,54 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { enrichJobData } from "./openai";
 import { rawJobIntakeSchema } from "@shared/schema";
+import twilio from "twilio";
+
+// Initialize Twilio client for outbound calls
+let twilioClient: twilio.Twilio | null = null;
+
+async function initializeTwilioClient() {
+  try {
+    const config = await storage.getTwilioConfig();
+    if (config && config.account_sid && config.auth_token) {
+      twilioClient = twilio(config.account_sid, config.auth_token);
+      console.log("Twilio client initialized for outbound calls");
+    }
+  } catch (error) {
+    console.error("Failed to initialize Twilio client:", error);
+  }
+}
+
+// Function to send outbound SMS
+async function sendSMS(to: string, message: string, from?: string) {
+  if (!twilioClient) {
+    await initializeTwilioClient();
+  }
+  
+  if (!twilioClient) {
+    throw new Error("Twilio client not initialized");
+  }
+
+  const config = await storage.getTwilioConfig();
+  const fromNumber = from || config?.phone_number;
+  
+  if (!fromNumber) {
+    throw new Error("No Twilio phone number configured");
+  }
+
+  try {
+    const message_instance = await twilioClient.messages.create({
+      body: message,
+      from: fromNumber,
+      to: to
+    });
+    
+    console.log(`SMS sent successfully. SID: ${message_instance.sid}`);
+    return message_instance;
+  } catch (error) {
+    console.error("Failed to send SMS:", error);
+    throw error;
+  }
+}
 
 export function registerTwilioRoutes(app: Express) {
   // Get Twilio configuration
@@ -269,4 +317,35 @@ export function registerTwilioRoutes(app: Express) {
       res.status(500).send("Error processing status");
     }
   });
+
+  // Send outbound SMS endpoint
+  app.post("/api/twilio/send-sms", async (req, res) => {
+    try {
+      const { to, message, from } = req.body;
+      
+      if (!to || !message) {
+        res.status(400).json({ error: "Missing required fields: to, message" });
+        return;
+      }
+
+      const result = await sendSMS(to, message, from);
+      
+      res.json({
+        success: true,
+        sid: result.sid,
+        status: result.status,
+        to: result.to,
+        from: result.from
+      });
+    } catch (error) {
+      console.error("Send SMS error:", error);
+      res.status(500).json({
+        error: "Failed to send SMS",
+        message: error instanceof Error ? error.message : "Unknown error occurred"
+      });
+    }
+  });
+
+  // Initialize Twilio client on startup
+  initializeTwilioClient();
 }
