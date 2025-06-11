@@ -1,0 +1,1 @@
+ALTER TABLE "job_records" ALTER COLUMN "customer_address" DROP NOT NULL;

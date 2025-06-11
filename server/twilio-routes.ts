@@ -111,6 +111,7 @@ export function registerTwilioRoutes(app: Express) {
         urgency: aiResult.urgency,
         potential_parts: aiResult.potential_parts,
         source: "SMS",
+        submitted_at: new Date(),
         ai_confidence: aiResult.confidence,
         processing_time_ms: Date.now() - Date.now()
       });
@@ -224,6 +225,7 @@ export function registerTwilioRoutes(app: Express) {
         urgency: aiResult.urgency,
         potential_parts: aiResult.potential_parts,
         source: "Phone Call",
+        submitted_at: new Date(),
         ai_confidence: aiResult.confidence,
         processing_time_ms: Date.now() - Date.now()
       });
