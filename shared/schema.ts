@@ -16,7 +16,7 @@ export const jobRecords = pgTable("job_records", {
   customer_name: text("customer_name").notNull(),
   customer_phone: text("customer_phone").notNull(),
   customer_email: text("customer_email"),
-  customer_address: text("customer_address").notNull(),
+  customer_address: text("customer_address"),
   service_type: text("service_type").notNull(),
   description: text("description").notNull(),
   ai_summary: text("ai_summary").notNull(),
