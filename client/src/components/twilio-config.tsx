@@ -67,7 +67,17 @@ export function TwilioConfig() {
     queryFn: async () => {
       const response = await fetch("/api/twilio/config");
       if (!response.ok) throw new Error("Failed to fetch configuration");
-      return response.json() as Promise<TwilioConfig | null>;
+      
+      const text = await response.text();
+      if (!text || text.trim() === '') {
+        return null;
+      }
+      
+      try {
+        return JSON.parse(text) as TwilioConfig | null;
+      } catch (e) {
+        return null;
+      }
     },
   });
 

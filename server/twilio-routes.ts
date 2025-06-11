@@ -7,7 +7,7 @@ export function registerTwilioRoutes(app: Express) {
   app.get("/api/twilio/config", async (req, res) => {
     try {
       const config = await storage.getTwilioConfig();
-      res.json(config);
+      res.json(config || null);
     } catch (error) {
       console.error("Error fetching Twilio config:", error);
       res.status(500).json({ error: "Failed to fetch Twilio configuration" });
