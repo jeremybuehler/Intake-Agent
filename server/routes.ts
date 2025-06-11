@@ -7,8 +7,12 @@ import { z } from "zod";
 import { connectionManager } from "./connection-manager";
 import { appConfig, performHealthCheck } from "./config";
 import { simpleMonitoring } from "./simple-monitoring";
+import { registerTwilioRoutes } from "./twilio-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Register Twilio configuration routes
+  registerTwilioRoutes(app);
   
   // Main intake endpoint
   app.post("/api/intake", async (req, res) => {
