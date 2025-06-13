@@ -123,6 +123,187 @@ export function registerTwilioRoutes(app: Express) {
     }
   });
 
+  // Webhook endpoint for incoming SMS messages
+  app.post("/api/twilio/webhook/sms", async (req, res) => {
+    try {
+      console.log("Received SMS webhook:", req.body);
+      
+      const { From, To, Body, MessageSid } = req.body;
+      
+      if (!From || !Body) {
+        console.error("Missing required SMS data");
+        res.status(400).send("Missing required data");
+        return;
+      }
+
+      // Process the SMS message as a job intake
+      const jobData = {
+        customer_phone: From,
+        customer_name: "SMS Customer",
+        description: Body,
+        source: "sms" as const,
+        raw_data: JSON.stringify(req.body)
+      };
+
+      // Enrich with AI
+      const enrichedData = await enrichJobData(Body, `Phone: ${From}`);
+      
+      // Create job record
+      const jobRecord = await storage.createJobRecord({
+        job_id: `sms_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
+        customer_name: jobData.customer_name,
+        customer_phone: From,
+        description: Body,
+        service_type: enrichedData.service_type,
+        ai_summary: enrichedData.ai_summary,
+        issue_type: enrichedData.issue_type,
+        urgency: enrichedData.urgency,
+        potential_parts: enrichedData.potential_parts,
+        confidence: enrichedData.confidence,
+        source: "sms",
+        raw_data: jobData.raw_data,
+        processing_time: 0
+      });
+
+      console.log(`SMS job created: ${jobRecord.job_id}`);
+
+      // Send auto-response if enabled
+      const config = await storage.getTwilioConfig();
+      if (config?.auto_response_enabled) {
+        const responseMessage = `Thank you for contacting JiveAI! We've received your ${enrichedData.service_type} request and assigned job #${jobRecord.job_id}. Our team will respond within 24 hours.`;
+        
+        try {
+          await sendSMS(From, responseMessage, To);
+          console.log("Auto-response sent successfully");
+        } catch (error) {
+          console.error("Failed to send auto-response:", error);
+        }
+      }
+
+      // Respond to Twilio with TwiML
+      res.set('Content-Type', 'text/xml');
+      res.send(`<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Message>Job #${jobRecord.job_id} created. We'll contact you soon!</Message>
+        </Response>`);
+
+    } catch (error) {
+      console.error("SMS webhook error:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Webhook endpoint for incoming voice calls
+  app.post("/api/twilio/webhook/voice", async (req, res) => {
+    try {
+      console.log("Received voice webhook:", req.body);
+      
+      const { From, To, CallSid } = req.body;
+      
+      // Respond with TwiML to handle the call
+      res.set('Content-Type', 'text/xml');
+      res.send(`<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Say voice="alice">Thank you for calling JiveAI Intake Agent. Please leave a detailed message about your service request after the beep, and we'll get back to you within 24 hours.</Say>
+          <Record 
+            action="/api/twilio/webhook/recording" 
+            method="POST"
+            maxLength="300"
+            finishOnKey="#"
+            transcribe="true"
+            transcribeCallback="/api/twilio/webhook/transcription"
+          />
+          <Say voice="alice">Thank you for your message. Goodbye.</Say>
+        </Response>`);
+
+    } catch (error) {
+      console.error("Voice webhook error:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Webhook endpoint for voice recording completion
+  app.post("/api/twilio/webhook/recording", async (req, res) => {
+    try {
+      console.log("Received recording webhook:", req.body);
+      
+      const { From, RecordingUrl, RecordingSid, CallSid } = req.body;
+      
+      // Create a basic job record for the call
+      const jobRecord = await storage.createJobRecord({
+        job_id: `call_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
+        customer_name: "Voice Caller",
+        customer_phone: From,
+        description: `Voice message recorded. Recording SID: ${RecordingSid}`,
+        service_type: "Other",
+        ai_summary: "Voice message received, pending transcription",
+        issue_type: "Voice Call",
+        urgency: "medium",
+        potential_parts: [],
+        confidence: 50,
+        source: "voice",
+        raw_data: JSON.stringify({ ...req.body, recording_url: RecordingUrl }),
+        processing_time: 0
+      });
+
+      console.log(`Voice job created: ${jobRecord.job_id}`);
+
+      res.set('Content-Type', 'text/xml');
+      res.send(`<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Say voice="alice">Your message has been recorded as job number ${jobRecord.job_id}. Thank you!</Say>
+        </Response>`);
+
+    } catch (error) {
+      console.error("Recording webhook error:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Webhook endpoint for voice transcription
+  app.post("/api/twilio/webhook/transcription", async (req, res) => {
+    try {
+      console.log("Received transcription webhook:", req.body);
+      
+      const { TranscriptionText, RecordingSid, From } = req.body;
+      
+      if (TranscriptionText) {
+        // Find the job record and update with AI enrichment
+        const enrichedData = await enrichJobData(TranscriptionText, `Phone: ${From}`);
+        
+        // Here you would update the job record with the transcription and AI analysis
+        console.log("Transcription processed:", {
+          text: TranscriptionText,
+          enriched: enrichedData
+        });
+      }
+
+      res.status(200).send("OK");
+
+    } catch (error) {
+      console.error("Transcription webhook error:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Status callback webhook for message delivery updates
+  app.post("/api/twilio/webhook/status", async (req, res) => {
+    try {
+      console.log("Received status callback:", req.body);
+      
+      const { MessageSid, MessageStatus, ErrorCode, ErrorMessage } = req.body;
+      
+      // Log the status update for monitoring
+      console.log(`Message ${MessageSid} status: ${MessageStatus}${ErrorCode ? ` (Error: ${ErrorCode})` : ''}`);
+      
+      res.status(200).send("OK");
+
+    } catch (error) {
+      console.error("Status callback error:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
   // Delete Twilio configuration
   app.delete("/api/twilio/config/:id", async (req, res) => {
     try {
