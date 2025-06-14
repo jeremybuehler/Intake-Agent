@@ -97,9 +97,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...noetisResult,
         workforce_routing: {
           routed_to: noetisResult.route_to,
-          workforce_id: ('job_id' in workforceResponse) ? workforceResponse.job_id : 
-                     ('quote_id' in workforceResponse) ? workforceResponse.quote_id : 
-                     ('notification_id' in workforceResponse) ? workforceResponse.notification_id : null,
+          workforce_id: workforceResponse ? 
+            ('job_id' in workforceResponse) ? workforceResponse.job_id : 
+            ('quote_id' in workforceResponse) ? workforceResponse.quote_id : 
+            ('notification_id' in workforceResponse) ? workforceResponse.notification_id : null : null,
           routed_at: new Date().toISOString()
         }
       };
@@ -187,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "123 Test Street, Tampa, FL 33602"
         },
         job_type: "ac_repair",
-        urgency: route_type === "dispatch" ? "high" : "medium",
+        urgency: (route_type === "dispatch" ? "high" : "medium") as "low" | "medium" | "high" | "emergency",
         address: "123 Test Street, Tampa, FL 33602",
         location: {
           validated: true,
@@ -196,10 +197,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         notes: "Test job for workforce routing verification",
         tags: ["test", "routing_verification"],
-        route_to: route_type === "dispatch" ? "dispatch_queue" : 
-                 route_type === "quote" ? "quote_queue" : "fallback_notification",
+        route_to: (route_type === "dispatch" ? "dispatch_queue" : 
+                 route_type === "quote" ? "quote_queue" : "fallback_notification") as "dispatch_queue" | "quote_queue" | "fallback_notification",
         confidence: 85,
-        requires_review: false
+        requires_review: false,
+        processing_metadata: {
+          ai_model: "test-model",
+          processing_time: 100,
+          timestamp: new Date().toISOString()
+        }
       };
 
       let routingResult;

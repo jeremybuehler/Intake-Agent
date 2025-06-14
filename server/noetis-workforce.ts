@@ -301,7 +301,7 @@ export class NoetisWorkforceIntegration {
       return response;
       
     } catch (error) {
-      throw new Error(`Mill API error: ${error.message}`);
+      throw new Error(`Felix API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -315,7 +315,7 @@ export class NoetisWorkforceIntegration {
       return response;
       
     } catch (error) {
-      throw new Error(`Quote API error: ${error.message}`);
+      throw new Error(`Quinn API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
