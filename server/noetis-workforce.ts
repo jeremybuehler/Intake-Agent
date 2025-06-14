@@ -1,7 +1,7 @@
 import { NoetisJobOutput } from "./noetis-ai";
 
-// Noetis Dispatch (Mill) Integration
-export interface MillDispatchJob {
+// Noetis Mesh Agent: Felix (Field Execution & Logistics Integration eXpert)
+export interface FelixDispatchJob {
   job_id: string;
   customer: {
     name: string;
@@ -29,8 +29,8 @@ export interface MillDispatchJob {
   updated_at: string;
 }
 
-// Noetis Quote System Integration
-export interface NoetisQuoteRequest {
+// Noetis Mesh Agent: Quinn (Quote & Upselling Intelligence Network Navigator)
+export interface QuinnQuoteRequest {
   quote_id: string;
   customer: {
     name: string;
@@ -56,20 +56,20 @@ export interface NoetisQuoteRequest {
 }
 
 export class NoetisWorkforceIntegration {
-  private millApiUrl: string;
-  private quoteApiUrl: string;
+  private felixApiUrl: string;
+  private quinnApiUrl: string;
   private apiKey: string;
 
   constructor() {
-    this.millApiUrl = process.env.NOETIS_MILL_API_URL || "http://localhost:3001/api/dispatch";
-    this.quoteApiUrl = process.env.NOETIS_QUOTE_API_URL || "http://localhost:3002/api/quotes";
-    this.apiKey = process.env.NOETIS_API_KEY || "noetis_demo_key";
+    this.felixApiUrl = process.env.FELIX_MESH_URL || "https://felix.noetis.mesh/api/dispatch";
+    this.quinnApiUrl = process.env.QUINN_MESH_URL || "https://quinn.noetis.mesh/api/quotes";
+    this.apiKey = process.env.NOETIS_MESH_KEY || "mesh_agent_key";
   }
 
-  // Route job to Noetis Dispatch (Mill)
-  async routeToDispatch(noetisJob: NoetisJobOutput): Promise<MillDispatchJob> {
+  // Route job to Felix (Field Execution & Logistics Agent)
+  async routeToFelix(noetisJob: NoetisJobOutput): Promise<FelixDispatchJob> {
     try {
-      const dispatchJob: MillDispatchJob = {
+      const dispatchJob: FelixDispatchJob = {
         job_id: `dispatch_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
         customer: noetisJob.customer,
         job_type: noetisJob.job_type,
@@ -97,15 +97,15 @@ export class NoetisWorkforceIntegration {
       return response;
 
     } catch (error) {
-      console.error("Failed to route to Mill dispatch:", error);
-      throw new Error(`Mill dispatch routing failed: ${error.message}`);
+      console.error("Failed to route to Felix agent:", error);
+      throw new Error(`Felix agent routing failed: ${(error as Error).message}`);
     }
   }
 
-  // Route job to Noetis Quote System
-  async routeToQuote(noetisJob: NoetisJobOutput): Promise<NoetisQuoteRequest> {
+  // Route job to Quinn (Quote & Upselling Intelligence Agent)
+  async routeToQuinn(noetisJob: NoetisJobOutput): Promise<QuinnQuoteRequest> {
     try {
-      const quoteRequest: NoetisQuoteRequest = {
+      const quoteRequest: QuinnQuoteRequest = {
         quote_id: `quote_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
         customer: noetisJob.customer,
         job_type: noetisJob.job_type,
@@ -120,15 +120,15 @@ export class NoetisWorkforceIntegration {
         updated_at: new Date().toISOString()
       };
 
-      // Send to Quote System
-      const response = await this.sendToQuote(quoteRequest);
+      // Send to Quinn Agent
+      const response = await this.sendToQuinn(quoteRequest);
       
-      console.log(`Job routed to Noetis Quote System: ${quoteRequest.quote_id}`);
+      console.log(`Job routed to Quinn Agent: ${quoteRequest.quote_id}`);
       return response;
 
     } catch (error) {
-      console.error("Failed to route to Quote system:", error);
-      throw new Error(`Quote system routing failed: ${error.message}`);
+      console.error("Failed to route to Quinn agent:", error);
+      throw new Error(`Quinn agent routing failed: ${(error as Error).message}`);
     }
   }
 
@@ -291,7 +291,7 @@ export class NoetisWorkforceIntegration {
     return validUntil.toISOString();
   }
 
-  private async sendToMill(dispatchJob: MillDispatchJob): Promise<MillDispatchJob> {
+  private async sendToFelix(dispatchJob: FelixDispatchJob): Promise<FelixDispatchJob> {
     // In production, this would make actual HTTP requests to Mill API
     try {
       console.log(`Sending job to Mill Dispatch: ${JSON.stringify(dispatchJob, null, 2)}`);

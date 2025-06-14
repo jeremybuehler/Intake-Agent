@@ -1,10 +1,4 @@
-if (noetisResult.route_to === "dispatch_queue") {
-  workforceResponse = await workforceIntegration.routeToDispatch(noetisResult);
-} else if (noetisResult.route_to === "quote_queue") {
-  workforceResponse = await workforceIntegration.routeToQuote(noetisResult);
-} else if (noetisResult.route_to === "fallback_notification") {
-  workforceResponse = await workforceIntegration.sendFallbackNotification(noetisResult, fallbackReason);
-}import type { Express } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
