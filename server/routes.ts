@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
 import { enrichJobData } from "./openai";
 import { processJobWithAva } from "./noetis-ai";
+import { workforceIntegration } from "./noetis-workforce";
 import { z } from "zod";
 import { connectionManager } from "./connection-manager";
 import { appConfig, performHealthCheck } from "./config";
@@ -71,8 +72,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store the job record
       await storage.createJobRecord(jobRecord);
 
-      // Return Noetis-compliant response from Ava
-      res.status(201).json(noetisResult);
+      // Route to appropriate Noetis workforce system
+      let workforceResponse = null;
+      try {
+        if (noetisResult.route_to === "dispatch_queue") {
+          workforceResponse = await workforceIntegration.routeToDispatch(noetisResult);
+          console.log(`Job routed to Mill Dispatch: ${workforceResponse.job_id}`);
+        } else if (noetisResult.route_to === "quote_queue") {
+          workforceResponse = await workforceIntegration.routeToQuote(noetisResult);
+          console.log(`Job routed to Quote System: ${workforceResponse.quote_id}`);
+        } else if (noetisResult.route_to === "fallback_notification") {
+          const fallbackReason = !noetisResult.location.serviceable ? 
+            "Outside service area" : "Requires manual review";
+          workforceResponse = await workforceIntegration.sendFallbackNotification(noetisResult, fallbackReason);
+          console.log(`Fallback notification sent: ${workforceResponse.notification_id}`);
+        }
+      } catch (error) {
+        console.error("Workforce routing error:", error);
+        // Continue with response even if workforce routing fails
+      }
+
+      // Return enhanced Noetis response with workforce routing info
+      const enhancedResponse = {
+        ...noetisResult,
+        workforce_routing: {
+          routed_to: noetisResult.route_to,
+          workforce_id: workforceResponse?.job_id || workforceResponse?.quote_id || workforceResponse?.notification_id,
+          routed_at: new Date().toISOString()
+        }
+      };
+
+      res.status(201).json(enhancedResponse);
 
     } catch (error) {
       console.error("Ava processing error:", error);
@@ -92,6 +122,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: errorMessage
         });
       }
+    }
+  });
+
+  // Workforce integration endpoints
+  app.get("/api/workforce/dispatch", async (req, res) => {
+    try {
+      // Return dispatch queue status (mock data for now)
+      const dispatchStatus = {
+        pending_jobs: 3,
+        assigned_jobs: 7,
+        in_progress_jobs: 2,
+        completed_today: 15,
+        average_response_time: "45 minutes",
+        technicians_available: 5,
+        last_updated: new Date().toISOString()
+      };
+      
+      res.json(dispatchStatus);
+    } catch (error) {
+      console.error("Error fetching dispatch status:", error);
+      res.status(500).json({ error: "Failed to fetch dispatch status" });
+    }
+  });
+
+  app.get("/api/workforce/quotes", async (req, res) => {
+    try {
+      // Return quote system status (mock data for now)
+      const quoteStatus = {
+        pending_quotes: 8,
+        draft_quotes: 5,
+        sent_quotes: 12,
+        approved_quotes: 3,
+        average_quote_value: 1250,
+        conversion_rate: "68%",
+        last_updated: new Date().toISOString()
+      };
+      
+      res.json(quoteStatus);
+    } catch (error) {
+      console.error("Error fetching quote status:", error);
+      res.status(500).json({ error: "Failed to fetch quote status" });
+    }
+  });
+
+  app.post("/api/workforce/test-routing", async (req, res) => {
+    try {
+      const { route_type } = req.body;
+      
+      if (!route_type || !["dispatch", "quote", "fallback"].includes(route_type)) {
+        return res.status(400).json({ 
+          error: "Invalid route_type. Must be 'dispatch', 'quote', or 'fallback'" 
+        });
+      }
+
+      // Create test job for routing
+      const testJob = {
+        customer: {
+          name: "Test Customer",
+          phone: "+15551234567",
+          email: "test@example.com",
+          address: "123 Test Street, Tampa, FL 33602"
+        },
+        job_type: "ac_repair",
+        urgency: route_type === "dispatch" ? "high" : "medium",
+        address: "123 Test Street, Tampa, FL 33602",
+        location: {
+          validated: true,
+          serviceable: route_type !== "fallback",
+          zone: "zone_1"
+        },
+        notes: "Test job for workforce routing verification",
+        tags: ["test", "routing_verification"],
+        route_to: route_type === "dispatch" ? "dispatch_queue" : 
+                 route_type === "quote" ? "quote_queue" : "fallback_notification",
+        confidence: 85,
+        requires_review: false
+      };
+
+      let routingResult;
+      if (route_type === "dispatch") {
+        routingResult = await workforceIntegration.routeToDispatch(testJob);
+      } else if (route_type === "quote") {
+        routingResult = await workforceIntegration.routeToQuote(testJob);
+      } else {
+        routingResult = await workforceIntegration.sendFallbackNotification(testJob, "Test fallback");
+      }
+
+      res.json({
+        success: true,
+        route_type,
+        result: routingResult,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error("Workforce routing test error:", error);
+      res.status(500).json({
+        error: "Failed to test workforce routing",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
