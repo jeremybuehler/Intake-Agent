@@ -14,7 +14,7 @@ import {
   Activity
 } from "lucide-react";
 
-interface DispatchStatus {
+interface FelixAgentStatus {
   pending_jobs: number;
   assigned_jobs: number;
   in_progress_jobs: number;
@@ -24,7 +24,7 @@ interface DispatchStatus {
   last_updated: string;
 }
 
-interface QuoteStatus {
+interface QuinnAgentStatus {
   pending_quotes: number;
   draft_quotes: number;
   sent_quotes: number;
@@ -35,12 +35,12 @@ interface QuoteStatus {
 }
 
 export function WorkforceDashboard() {
-  const { data: dispatchData, isLoading: dispatchLoading } = useQuery<DispatchStatus>({
+  const { data: felixData, isLoading: felixLoading } = useQuery<FelixAgentStatus>({
     queryKey: ["/api/workforce/dispatch"],
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
-  const { data: quoteData, isLoading: quoteLoading } = useQuery<QuoteStatus>({
+  const { data: quinnData, isLoading: quinnLoading } = useQuery<QuinnAgentStatus>({
     queryKey: ["/api/workforce/quotes"],
     refetchInterval: 30000
   });
@@ -66,8 +66,8 @@ export function WorkforceDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Noetis Workforce Integration</h2>
-          <p className="text-gray-600">Mill Dispatch and Quote System Status</p>
+          <h2 className="text-2xl font-bold text-gray-900">Noetis Mesh Agents</h2>
+          <p className="text-gray-600">Felix & Quinn Agent Status</p>
         </div>
         <div className="flex space-x-2">
           <Button 
@@ -75,14 +75,14 @@ export function WorkforceDashboard() {
             size="sm"
             onClick={() => testRouting("dispatch")}
           >
-            Test Dispatch
+            Test Felix
           </Button>
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => testRouting("quote")}
           >
-            Test Quote
+            Test Quinn
           </Button>
           <Button 
             variant="outline" 
@@ -96,8 +96,8 @@ export function WorkforceDashboard() {
 
       <Tabs defaultValue="dispatch" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="dispatch">Mill Dispatch</TabsTrigger>
-          <TabsTrigger value="quotes">Quote System</TabsTrigger>
+          <TabsTrigger value="dispatch">Felix Agent</TabsTrigger>
+          <TabsTrigger value="quotes">Quinn Agent</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dispatch" className="space-y-6">
@@ -109,7 +109,7 @@ export function WorkforceDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {dispatchLoading ? "..." : dispatchData?.pending_jobs || 0}
+                  {felixLoading ? "..." : felixData?.pending_jobs || 0}
                 </div>
                 <p className="text-xs text-gray-600">Awaiting assignment</p>
               </CardContent>
@@ -121,84 +121,89 @@ export function WorkforceDashboard() {
                 <Users className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {dispatchLoading ? "..." : dispatchData?.assigned_jobs || 0}
+                <div className="text-2xl font-bold text-blue-600">
+                  {felixLoading ? "..." : felixData?.assigned_jobs || 0}
                 </div>
-                <p className="text-xs text-gray-600">Active assignments</p>
+                <p className="text-xs text-gray-600">Currently in field</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                <Activity className="h-4 w-4 text-orange-600" />
+                <Activity className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {dispatchLoading ? "..." : dispatchData?.in_progress_jobs || 0}
+                <div className="text-2xl font-bold text-green-600">
+                  {felixLoading ? "..." : felixData?.in_progress_jobs || 0}
                 </div>
-                <p className="text-xs text-gray-600">Currently working</p>
+                <p className="text-xs text-gray-600">Active service calls</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Completed Today</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <CheckCircle className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {dispatchLoading ? "..." : dispatchData?.completed_today || 0}
+                <div className="text-2xl font-bold text-purple-600">
+                  {felixLoading ? "..." : felixData?.completed_today || 0}
                 </div>
                 <p className="text-xs text-gray-600">Jobs finished</p>
               </CardContent>
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Clock className="mr-2 h-5 w-5" />
-                  Response Time
-                </CardTitle>
+                <CardTitle className="text-lg">Felix Performance Metrics</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {dispatchLoading ? "..." : dispatchData?.average_response_time || "N/A"}
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Average Response Time</span>
+                  <span className="font-medium">
+                    {felixLoading ? "..." : felixData?.average_response_time || "N/A"}
+                  </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Average dispatch response</p>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Available Technicians</span>
+                  <span className="font-medium">
+                    {felixLoading ? "..." : felixData?.technicians_available || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Last Updated</span>
+                  <span className="text-xs text-gray-500">
+                    {felixData?.last_updated ? new Date(felixData.last_updated).toLocaleTimeString() : "N/A"}
+                  </span>
+                </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="mr-2 h-5 w-5" />
-                  Available Technicians
-                </CardTitle>
+                <CardTitle className="text-lg">Job Distribution</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">
-                  {dispatchLoading ? "..." : dispatchData?.technicians_available || 0}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-yellow-600 border-yellow-600">Pending</Badge>
+                    <span>{felixData?.pending_jobs || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-blue-600 border-blue-600">Assigned</Badge>
+                    <span>{felixData?.assigned_jobs || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-green-600 border-green-600">In Progress</Badge>
+                    <span>{felixData?.in_progress_jobs || 0}</span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Ready for assignment</p>
               </CardContent>
             </Card>
           </div>
-
-          {dispatchData?.last_updated && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Last updated:</span>
-                  <Badge variant="outline">
-                    {new Date(dispatchData.last_updated).toLocaleTimeString()}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         <TabsContent value="quotes" className="space-y-6">
@@ -209,97 +214,106 @@ export function WorkforceDashboard() {
                 <FileText className="h-4 w-4 text-yellow-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {quoteLoading ? "..." : quoteData?.pending_quotes || 0}
+                <div className="text-2xl font-bold text-yellow-600">
+                  {quinnLoading ? "..." : quinnData?.pending_quotes || 0}
                 </div>
-                <p className="text-xs text-gray-600">Awaiting processing</p>
+                <p className="text-xs text-gray-600">Awaiting preparation</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Draft Quotes</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <FileText className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {quoteLoading ? "..." : quoteData?.draft_quotes || 0}
+                <div className="text-2xl font-bold text-blue-600">
+                  {quinnLoading ? "..." : quinnData?.draft_quotes || 0}
                 </div>
-                <p className="text-xs text-gray-600">In preparation</p>
+                <p className="text-xs text-gray-600">Being prepared</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Sent Quotes</CardTitle>
-                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <TrendingUp className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {quoteLoading ? "..." : quoteData?.sent_quotes || 0}
+                <div className="text-2xl font-bold text-green-600">
+                  {quinnLoading ? "..." : quinnData?.sent_quotes || 0}
                 </div>
-                <p className="text-xs text-gray-600">Awaiting response</p>
+                <p className="text-xs text-gray-600">Awaiting customer response</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Approved</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-sm font-medium">Approved Quotes</CardTitle>
+                <CheckCircle className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {quoteLoading ? "..." : quoteData?.approved_quotes || 0}
+                <div className="text-2xl font-bold text-purple-600">
+                  {quinnLoading ? "..." : quinnData?.approved_quotes || 0}
                 </div>
-                <p className="text-xs text-gray-600">Customer approved</p>
+                <p className="text-xs text-gray-600">Ready for scheduling</p>
               </CardContent>
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  Average Quote Value
-                </CardTitle>
+                <CardTitle className="text-lg">Quinn Performance Metrics</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-600">
-                  {quoteLoading ? "..." : `$${quoteData?.average_quote_value?.toLocaleString() || 0}`}
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Average Quote Value</span>
+                  <span className="font-medium">
+                    {quinnLoading ? "..." : `$${quinnData?.average_quote_value || 0}`}
+                  </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Per quote average</p>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Conversion Rate</span>
+                  <span className="font-medium">
+                    {quinnLoading ? "..." : quinnData?.conversion_rate || "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Last Updated</span>
+                  <span className="text-xs text-gray-500">
+                    {quinnData?.last_updated ? new Date(quinnData.last_updated).toLocaleTimeString() : "N/A"}
+                  </span>
+                </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="mr-2 h-5 w-5" />
-                  Conversion Rate
-                </CardTitle>
+                <CardTitle className="text-lg">Quote Status Distribution</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {quoteLoading ? "..." : quoteData?.conversion_rate || "0%"}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-yellow-600 border-yellow-600">Pending</Badge>
+                    <span>{quinnData?.pending_quotes || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-blue-600 border-blue-600">Draft</Badge>
+                    <span>{quinnData?.draft_quotes || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-green-600 border-green-600">Sent</Badge>
+                    <span>{quinnData?.sent_quotes || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-purple-600 border-purple-600">Approved</Badge>
+                    <span>{quinnData?.approved_quotes || 0}</span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Quote to job conversion</p>
               </CardContent>
             </Card>
           </div>
-
-          {quoteData?.last_updated && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Last updated:</span>
-                  <Badge variant="outline">
-                    {new Date(quoteData.last_updated).toLocaleTimeString()}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
       </Tabs>
     </div>

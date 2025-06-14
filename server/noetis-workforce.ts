@@ -154,7 +154,7 @@ export class NoetisWorkforceIntegration {
 
     } catch (error) {
       console.error("Failed to send fallback notification:", error);
-      throw new Error(`Fallback notification failed: ${error.message}`);
+      throw new Error(`Fallback notification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
