@@ -8,6 +8,7 @@ import { MetricsDashboard } from "@/components/metrics-dashboard";
 import { SystemDashboard } from "@/components/system-dashboard";
 import { TwilioConfig } from "@/components/twilio-config";
 import { ApiDashboard } from "@/components/api-dashboard";
+import { WorkforceDashboard } from "@/components/workforce-dashboard";
 import { api } from "@/lib/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -353,6 +354,11 @@ export default function Dashboard() {
             <ApiTester />
             <JobLogs />
             <MetricsDashboard />
+            
+            {/* Workforce Integration Section */}
+            <section id="workforce" className="mb-12">
+              <WorkforceDashboard />
+            </section>
             
             {/* Twilio Configuration Section */}
             <section id="twilio" className="mb-12">
