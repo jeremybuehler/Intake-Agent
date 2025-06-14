@@ -30,68 +30,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique job ID
       const jobId = `job_${new Date().getFullYear()}_${String(Date.now()).slice(-6)}`;
       
-      // Prepare customer info for AI analysis
+      // Prepare customer info for Ava's analysis
       const customerInfo = `Name: ${validatedInput.customer_name}, Phone: ${validatedInput.customer_phone}, Address: ${validatedInput.address}`;
       
-      // Get AI enrichment
-      const aiResult = await enrichJobData(validatedInput.description, customerInfo);
+      // Process with Ava for Noetis FSM compliance
+      const noetisResult = await processJobWithAva(
+        validatedInput.description,
+        customerInfo,
+        validatedInput.customer_phone,
+        validatedInput.customer_email,
+        validatedInput.address
+      );
       
       const processingTime = Date.now() - startTime;
       
       // Record successful job processing metrics
-      simpleMonitoring.recordJobSuccess(processingTime, aiResult.confidence);
+      simpleMonitoring.recordJobSuccess(processingTime, noetisResult.confidence);
       
-      // Create job record for storage
+      // Create job record for storage (maintaining backwards compatibility)
       const jobRecord = {
         job_id: jobId,
-        customer_name: validatedInput.customer_name,
-        customer_phone: validatedInput.customer_phone,
-        customer_email: validatedInput.customer_email || null,
-        customer_address: validatedInput.address,
-        service_type: aiResult.service_type,
+        customer_name: noetisResult.customer.name,
+        customer_phone: noetisResult.customer.phone,
+        customer_email: noetisResult.customer.email || null,
+        customer_address: noetisResult.customer.address,
+        service_type: noetisResult.job_type,
         description: validatedInput.description,
-        ai_summary: aiResult.ai_summary,
-        issue_type: aiResult.issue_type,
-        urgency: aiResult.urgency,
-        potential_parts: aiResult.potential_parts,
+        ai_summary: noetisResult.notes,
+        issue_type: noetisResult.job_type,
+        urgency: noetisResult.urgency,
+        potential_parts: noetisResult.tags,
         preferred_time: validatedInput.preferred_time || null,
         source: validatedInput.source,
         submitted_at: new Date(),
         status: "pending_intake" as const,
-        ai_confidence: aiResult.confidence,
+        ai_confidence: noetisResult.confidence,
         processing_time_ms: processingTime,
       };
 
       // Store the job record
       await storage.createJobRecord(jobRecord);
 
-      // Format response as JobRecord
-      const response: JobRecord = {
-        job_id: jobId,
-        customer: {
-          name: validatedInput.customer_name,
-          phone: validatedInput.customer_phone,
-          email: validatedInput.customer_email,
-          address: validatedInput.address,
-        },
-        service_type: aiResult.service_type,
-        description: validatedInput.description,
-        ai_summary: aiResult.ai_summary,
-        issue_type: aiResult.issue_type,
-        urgency: aiResult.urgency,
-        potential_parts: aiResult.potential_parts,
-        preferred_time: validatedInput.preferred_time,
-        source: validatedInput.source,
-        submitted_at: jobRecord.submitted_at.toISOString(),
-        status: "pending_intake",
-        ai_confidence: aiResult.confidence,
-        processing_time_ms: processingTime,
-      };
-
-      res.status(200).json(response);
+      // Return Noetis-compliant response from Ava
+      res.status(201).json(noetisResult);
 
     } catch (error) {
-      console.error("Intake processing error:", error);
+      console.error("Ava processing error:", error);
       
       // Record failed job processing
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
