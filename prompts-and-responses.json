@@ -1,0 +1,259 @@
+
+{
+  "project_info": {
+    "name": "JiveAI Intake Agent",
+    "version": "1.0.0",
+    "description": "AI-powered field service intake agent with multi-channel processing",
+    "tech_stack": ["React", "TypeScript", "Express.js", "PostgreSQL", "OpenAI GPT-4o", "Twilio"]
+  },
+  "ai_prompts": {
+    "job_enrichment": {
+      "system_prompt": "You are an AI assistant specialized in field service job analysis. Your task is to analyze unstructured job requests and extract structured information including service type, urgency level, issue classification, and potential parts needed.",
+      "user_prompt_template": "Analyze this field service request and provide structured data:\n\nCustomer: {customer_name}\nDescription: {description}\nAddress: {address}\n\nPlease categorize this job and provide:\n1. Service type (AC Repair, Install, Maintenance, Heating, Other)\n2. Urgency level (low, medium, high)\n3. Issue type classification\n4. Potential parts that might be needed\n5. Professional summary of the issue\n6. Confidence score (0-100)",
+      "response_format": {
+        "service_type": "string",
+        "urgency": "string",
+        "issue_type": "string", 
+        "potential_parts": ["array", "of", "strings"],
+        "ai_summary": "string",
+        "confidence": "number"
+      }
+    },
+    "voice_transcription_analysis": {
+      "system_prompt": "You are analyzing voice transcriptions from field service customers. Extract key information and classify the service request based on the transcribed text.",
+      "user_prompt_template": "Analyze this voice transcription from a customer service call:\n\nTranscription: {transcription_text}\nCaller: {phone_number}\n\nExtract:\n1. Customer issue description\n2. Service type needed\n3. Urgency level\n4. Any specific equipment mentioned\n5. Preferred timing if mentioned"
+    },
+    "sms_processing": {
+      "system_prompt": "You are processing SMS messages for field service intake. Parse the message content to extract service request information.",
+      "user_prompt_template": "Process this SMS service request:\n\nFrom: {phone_number}\nMessage: {message_body}\n\nExtract service details and classify the request."
+    }
+  },
+  "twilio_responses": {
+    "sms_confirmations": {
+      "job_created_success": "Thank you! Your service request has been received as job #{job_id}. We'll contact you within 24 hours to schedule your {service_type} service.",
+      "job_created_urgent": "URGENT REQUEST RECEIVED: Job #{job_id} has been prioritized. Our team will contact you within 2 hours for your {service_type} service.",
+      "job_created_standard": "Service request received as job #{job_id}. Expected contact time: 4-6 hours for {service_type} service."
+    },
+    "voice_twiml": {
+      "welcome_message": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>\n  <Say voice=\"alice\">Thank you for calling JiveAI Intake Agent. Please leave a detailed message about your service request after the beep, and we'll get back to you within 24 hours.</Say>\n  <Record action=\"/api/twilio/webhook/recording\" method=\"POST\" maxLength=\"300\" finishOnKey=\"#\" transcribe=\"true\" transcribeCallback=\"/api/twilio/webhook/transcription\" />\n  <Say voice=\"alice\">Thank you for your message. Goodbye.</Say>\n</Response>",
+      "recording_confirmation": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>\n  <Say voice=\"alice\">Your message has been recorded as job number {job_id}. Thank you!</Say>\n</Response>",
+      "error_response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>\n  <Say voice=\"alice\">We're experiencing technical difficulties. Please try calling again later.</Say>\n</Response>"
+    }
+  },
+  "api_responses": {
+    "job_intake_success": {
+      "structure": {
+        "job_id": "string",
+        "customer": {
+          "name": "string",
+          "phone": "string", 
+          "email": "string",
+          "address": "string"
+        },
+        "service_type": "string",
+        "description": "string",
+        "ai_summary": "string",
+        "issue_type": "string",
+        "urgency": "string",
+        "potential_parts": ["array"],
+        "preferred_time": "string",
+        "source": "string",
+        "submitted_at": "ISO 8601 timestamp",
+        "status": "pending_intake",
+        "ai_confidence": "number",
+        "processing_time_ms": "number"
+      },
+      "example": {
+        "job_id": "job_2025_816523",
+        "customer": {
+          "name": "John Smith",
+          "phone": "+1234567890",
+          "email": "john@example.com",
+          "address": "123 Main St, Anytown USA"
+        },
+        "service_type": "AC Repair",
+        "description": "AC unit not cooling properly, making loud noises",
+        "ai_summary": "Customer's AC unit requires repair due to cooling failure and noise issues",
+        "issue_type": "HVAC_COOLING_FAILURE",
+        "urgency": "high",
+        "potential_parts": ["Compressor", "Condenser Fan Motor", "Refrigerant"],
+        "preferred_time": "Tomorrow morning",
+        "source": "SMS",
+        "submitted_at": "2025-06-11T18:00:19.046Z",
+        "status": "pending_intake",
+        "ai_confidence": 85,
+        "processing_time_ms": 2522
+      }
+    },
+    "error_responses": {
+      "validation_error": {
+        "error": "Validation failed",
+        "message": "Missing required fields: customer_name, description",
+        "code": 400
+      },
+      "ai_processing_error": {
+        "error": "AI processing failed", 
+        "message": "Unable to process job description with AI",
+        "code": 500
+      },
+      "twilio_error": {
+        "error": "Twilio service unavailable",
+        "message": "SMS delivery failed",
+        "code": 503
+      }
+    }
+  },
+  "dashboard_prompts": {
+    "api_documentation": {
+      "intake_endpoint": {
+        "method": "POST",
+        "url": "/api/intake",
+        "description": "Process and enrich raw job data using AI intelligence",
+        "required_fields": ["customer_name", "description"],
+        "optional_fields": ["customer_phone", "customer_email", "address", "preferred_time", "source"]
+      },
+      "jobs_endpoint": {
+        "method": "GET", 
+        "url": "/api/jobs",
+        "description": "Retrieve list of processed job records",
+        "query_params": ["limit", "offset", "status", "service_type"]
+      },
+      "metrics_endpoint": {
+        "method": "GET",
+        "url": "/api/metrics", 
+        "description": "Get system performance metrics and statistics"
+      }
+    },
+    "testing_prompts": {
+      "sample_requests": [
+        {
+          "scenario": "AC Repair Request",
+          "payload": {
+            "customer_name": "Sarah Johnson",
+            "customer_phone": "(555) 987-6543",
+            "customer_email": "sarah@email.com",
+            "address": "456 Oak Avenue, Dallas, TX 75201",
+            "description": "My air conditioner stopped working completely. It was making weird noises yesterday and now it won't turn on at all. The house is getting very hot.",
+            "preferred_time": "As soon as possible",
+            "source": "Phone Call"
+          }
+        },
+        {
+          "scenario": "Heating Maintenance",
+          "payload": {
+            "customer_name": "Mike Chen",
+            "customer_phone": "(555) 456-7890", 
+            "address": "789 Pine Street, Austin, TX 78701",
+            "description": "Annual furnace maintenance check needed before winter season",
+            "preferred_time": "Next week",
+            "source": "Website"
+          }
+        },
+        {
+          "scenario": "Emergency HVAC",
+          "payload": {
+            "customer_name": "Emergency Call",
+            "customer_phone": "(555) 111-2222",
+            "address": "321 Emergency Lane, Houston, TX 77001", 
+            "description": "HVAC system completely failed, no heat or AC, elderly residents in home",
+            "preferred_time": "EMERGENCY - NOW",
+            "source": "SMS"
+          }
+        }
+      ]
+    }
+  },
+  "system_prompts": {
+    "health_check_responses": {
+      "healthy": {
+        "status": "healthy",
+        "uptime": "{{uptime_seconds}}",
+        "services": {
+          "database": "connected",
+          "openai": "active", 
+          "twilio": "configured"
+        }
+      },
+      "degraded": {
+        "status": "degraded",
+        "issues": ["High response times", "AI service latency"],
+        "uptime": "{{uptime_seconds}}"
+      }
+    },
+    "configuration_prompts": {
+      "twilio_setup": "Configure Twilio integration for SMS and voice processing. Ensure webhook URLs point to your Replit deployment endpoints.",
+      "openai_setup": "Configure OpenAI API key for AI-powered job enrichment and analysis.",
+      "database_setup": "PostgreSQL database configured for job storage and system metrics."
+    }
+  },
+  "workflow_descriptions": {
+    "job_processing_flow": [
+      "1. Receive job data via SMS, voice, or API",
+      "2. Validate required fields and format",
+      "3. Send to OpenAI for AI enrichment", 
+      "4. Extract service type, urgency, and parts",
+      "5. Store enriched job in database",
+      "6. Send confirmation response to customer",
+      "7. Update system metrics"
+    ],
+    "sms_workflow": [
+      "1. Twilio receives SMS at configured number",
+      "2. Webhook calls /api/twilio/webhook endpoint",
+      "3. Extract customer phone and message content",
+      "4. Process message through AI enrichment",
+      "5. Create job record in database",
+      "6. Send TwiML confirmation response",
+      "7. Log transaction for monitoring"
+    ],
+    "voice_workflow": [
+      "1. Customer calls Twilio number",
+      "2. TwiML prompts for voice message",
+      "3. Record customer message",
+      "4. Transcribe recording to text",
+      "5. Process transcription through AI",
+      "6. Create job record from voice data",
+      "7. Confirm via voice response"
+    ]
+  },
+  "monitoring_prompts": {
+    "alert_messages": {
+      "high_error_rate": "ALERT: Error rate exceeded 10% threshold - Current: {{error_rate}}%",
+      "slow_response": "WARNING: Average response time exceeded 15 seconds - Current: {{avg_time}}ms",
+      "ai_service_down": "CRITICAL: OpenAI service unavailable - AI enrichment disabled",
+      "database_connection": "CRITICAL: Database connection lost - System degraded"
+    },
+    "metric_descriptions": {
+      "processing_time": "Time taken to process and enrich job requests",
+      "confidence_score": "AI confidence in job classification accuracy",
+      "throughput": "Number of jobs processed per hour",
+      "success_rate": "Percentage of successfully processed jobs"
+    }
+  },
+  "user_interface_prompts": {
+    "dashboard_titles": {
+      "main": "JiveAI Intake Agent Dashboard",
+      "jobs": "Job Management & Monitoring", 
+      "metrics": "System Performance Metrics",
+      "twilio": "Twilio Integration & Configuration",
+      "api": "API Documentation & Testing"
+    },
+    "status_messages": {
+      "job_created": "Job successfully created and enriched",
+      "processing": "Processing job with AI intelligence...",
+      "error": "Error occurred during job processing",
+      "success": "System operating normally"
+    }
+  },
+  "integration_prompts": {
+    "webhook_configurations": {
+      "twilio_sms": "https://your-repl-domain.replit.app/api/twilio/webhook",
+      "twilio_voice": "https://your-repl-domain.replit.app/api/twilio/voice", 
+      "transcription": "https://your-repl-domain.replit.app/api/twilio/transcription",
+      "recording": "https://your-repl-domain.replit.app/api/twilio/recording"
+    },
+    "api_key_instructions": {
+      "openai": "Set OPENAI_API_KEY in Replit Secrets for AI processing",
+      "twilio": "Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in Replit Secrets"
+    }
+  }
+}
