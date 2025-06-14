@@ -454,10 +454,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response: JobRecord = {
         job_id: job.job_id,
         customer: {
-          name: job.customer_name,
-          phone: job.customer_phone,
+          name: job.customer_name || "",
+          phone: job.customer_phone || "",
           email: job.customer_email || undefined,
-          address: job.customer_address,
+          address: job.customer_address || "",
         },
         service_type: job.service_type as any,
         description: job.description,
