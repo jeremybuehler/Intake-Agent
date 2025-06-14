@@ -76,11 +76,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let workforceResponse = null;
       try {
         if (noetisResult.route_to === "dispatch_queue") {
-          workforceResponse = await workforceIntegration.routeToDispatch(noetisResult);
-          console.log(`Job routed to Mill Dispatch: ${workforceResponse.job_id}`);
+          workforceResponse = await workforceIntegration.routeToFelix(noetisResult);
+          console.log(`Job routed to Felix Agent: ${workforceResponse.job_id}`);
         } else if (noetisResult.route_to === "quote_queue") {
-          workforceResponse = await workforceIntegration.routeToQuote(noetisResult);
-          console.log(`Job routed to Quote System: ${workforceResponse.quote_id}`);
+          workforceResponse = await workforceIntegration.routeToQuinn(noetisResult);
+          console.log(`Job routed to Quinn Agent: ${workforceResponse.quote_id}`);
         } else if (noetisResult.route_to === "fallback_notification") {
           const fallbackReason = !noetisResult.location.serviceable ? 
             "Outside service area" : "Requires manual review";
@@ -97,7 +97,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...noetisResult,
         workforce_routing: {
           routed_to: noetisResult.route_to,
-          workforce_id: workforceResponse?.job_id || workforceResponse?.quote_id || workforceResponse?.notification_id,
+          workforce_id: ('job_id' in workforceResponse) ? workforceResponse.job_id : 
+                     ('quote_id' in workforceResponse) ? workforceResponse.quote_id : 
+                     ('notification_id' in workforceResponse) ? workforceResponse.notification_id : null,
           routed_at: new Date().toISOString()
         }
       };
@@ -202,9 +204,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let routingResult;
       if (route_type === "dispatch") {
-        routingResult = await workforceIntegration.routeToDispatch(testJob);
+        routingResult = await workforceIntegration.routeToFelix(testJob);
       } else if (route_type === "quote") {
-        routingResult = await workforceIntegration.routeToQuote(testJob);
+        routingResult = await workforceIntegration.routeToQuinn(testJob);
       } else {
         routingResult = await workforceIntegration.sendFallbackNotification(testJob, "Test fallback");
       }

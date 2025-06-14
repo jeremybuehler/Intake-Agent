@@ -90,8 +90,8 @@ export class NoetisWorkforceIntegration {
         updated_at: new Date().toISOString()
       };
 
-      // Send to Mill Dispatch System
-      const response = await this.sendToMill(dispatchJob);
+      // Send to Felix Agent
+      const response = await this.sendToFelix(dispatchJob);
       
       console.log(`Job routed to Noetis Dispatch (Mill): ${dispatchJob.job_id}`);
       return response;
@@ -297,7 +297,7 @@ export class NoetisWorkforceIntegration {
       console.log(`Sending job to Mill Dispatch: ${JSON.stringify(dispatchJob, null, 2)}`);
       
       // Simulate API call
-      const response = await this.simulateMillResponse(dispatchJob);
+      const response = await this.simulateFelixResponse(dispatchJob);
       return response;
       
     } catch (error) {
@@ -305,13 +305,13 @@ export class NoetisWorkforceIntegration {
     }
   }
 
-  private async sendToQuote(quoteRequest: NoetisQuoteRequest): Promise<NoetisQuoteRequest> {
+  private async sendToQuinn(quoteRequest: QuinnQuoteRequest): Promise<QuinnQuoteRequest> {
     // In production, this would make actual HTTP requests to Quote API
     try {
       console.log(`Sending job to Quote System: ${JSON.stringify(quoteRequest, null, 2)}`);
       
       // Simulate API call
-      const response = await this.simulateQuoteResponse(quoteRequest);
+      const response = await this.simulateQuinnResponse(quoteRequest);
       return response;
       
     } catch (error) {
@@ -319,7 +319,7 @@ export class NoetisWorkforceIntegration {
     }
   }
 
-  private async simulateMillResponse(dispatchJob: MillDispatchJob): Promise<MillDispatchJob> {
+  private async simulateFelixResponse(dispatchJob: FelixDispatchJob): Promise<FelixDispatchJob> {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 100));
     
@@ -330,7 +330,7 @@ export class NoetisWorkforceIntegration {
     };
   }
 
-  private async simulateQuoteResponse(quoteRequest: NoetisQuoteRequest): Promise<NoetisQuoteRequest> {
+  private async simulateQuinnResponse(quoteRequest: QuinnQuoteRequest): Promise<QuinnQuoteRequest> {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 100));
     
