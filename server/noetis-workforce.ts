@@ -160,7 +160,7 @@ export class NoetisWorkforceIntegration {
 
   // Helper methods
   private estimateDuration(jobType: string, urgency: string): string {
-    const durationMap = {
+    const durationMap: Record<string, string> = {
       emergency: "2-4 hours",
       high: "4-6 hours", 
       medium: "1-2 days",
@@ -171,7 +171,7 @@ export class NoetisWorkforceIntegration {
   }
 
   private mapSkillsRequired(jobType: string, tags: string[]): string[] {
-    const skillsMap = {
+    const skillsMap: Record<string, string[]> = {
       ac_repair: ["hvac_certified", "electrical", "refrigeration"],
       ac_install: ["hvac_certified", "electrical", "heavy_lifting"],
       heating_repair: ["hvac_certified", "gas_certified", "electrical"],
@@ -186,11 +186,11 @@ export class NoetisWorkforceIntegration {
     if (tags.includes("emergency")) baseSkills.push("emergency_response");
     if (tags.includes("commercial")) baseSkills.push("commercial_certified");
     
-    return [...new Set(baseSkills)];
+    return Array.from(new Set(baseSkills));
   }
 
   private mapEquipmentNeeded(jobType: string): string[] {
-    const equipmentMap = {
+    const equipmentMap: Record<string, string[]> = {
       ac_repair: ["basic_tools", "multimeter", "gauges"],
       ac_install: ["lifting_equipment", "basic_tools", "gauges"],
       heating_repair: ["gas_detector", "basic_tools", "multimeter"],
@@ -223,7 +223,7 @@ export class NoetisWorkforceIntegration {
   }
 
   private calculatePriorityScore(urgency: string, tags: string[]): number {
-    const urgencyScores = {
+    const urgencyScores: Record<string, number> = {
       emergency: 100,
       high: 75,
       medium: 50,
@@ -253,7 +253,7 @@ export class NoetisWorkforceIntegration {
   }
 
   private estimateParts(jobType: string, tags: string[]): Array<{name: string, quantity: number, estimated_cost: number}> {
-    const partsMap = {
+    const partsMap: Record<string, Array<{name: string, quantity: number, estimated_cost: number}>> = {
       ac_repair: [
         { name: "Capacitor", quantity: 1, estimated_cost: 45 },
         { name: "Contactor", quantity: 1, estimated_cost: 65 }
@@ -273,7 +273,7 @@ export class NoetisWorkforceIntegration {
   }
 
   private estimateLaborHours(jobType: string): number {
-    const laborMap = {
+    const laborMap: Record<string, number> = {
       ac_repair: 2,
       ac_install: 8,
       heating_repair: 3,
