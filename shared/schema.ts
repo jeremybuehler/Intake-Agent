@@ -60,6 +60,41 @@ export const rawJobIntakeSchema = z.object({
   source: z.enum(["Webhook", "SMS", "Phone Call", "Email", "FSM API", "Manual Upload"]).default("Webhook"),
 });
 
+// Noetis FSM-compliant output schema for Ava
+export const noetisJobOutputSchema = z.object({
+  customer: z.object({
+    name: z.string(),
+    phone: z.string(),
+    email: z.string().optional(),
+    address: z.string(),
+    service_history: z.array(z.string()).optional(),
+    preferred_contact: z.enum(["phone", "sms", "email"]).optional()
+  }),
+  job_type: z.string(), // HVAC-specific job types
+  urgency: z.enum(["low", "medium", "high", "emergency"]),
+  address: z.string(),
+  location: z.object({
+    validated: z.boolean(),
+    serviceable: z.boolean(),
+    zone: z.string().optional(),
+    coordinates: z.object({
+      lat: z.number(),
+      lng: z.number()
+    }).optional()
+  }),
+  notes: z.string(),
+  tags: z.array(z.string()), // Auto-generated tags
+  route_to: z.enum(["dispatch_queue", "quote_queue", "fallback_notification"]),
+  confidence: z.number().min(0).max(100),
+  requires_review: z.boolean().default(false),
+  similar_jobs: z.array(z.string()).optional(),
+  processing_metadata: z.object({
+    ai_model: z.string(),
+    processing_time: z.number(),
+    timestamp: z.string()
+  })
+});
+
 // JobRecord output schema
 export const jobRecordSchema = z.object({
   job_id: z.string(),

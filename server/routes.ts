@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
 import { enrichJobData } from "./openai";
+import { processJobWithAva } from "./noetis-ai";
 import { z } from "zod";
 import { connectionManager } from "./connection-manager";
 import { appConfig, performHealthCheck } from "./config";
