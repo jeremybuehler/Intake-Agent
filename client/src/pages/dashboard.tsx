@@ -28,10 +28,10 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">NO</span>
+                  <span className="text-white font-bold text-sm">JA</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">Noetis</h1>
+                  <h1 className="text-lg font-semibold text-gray-900">JiveAI</h1>
                   <p className="text-xs text-gray-500">Ava - Intake Agent</p>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export default function Dashboard() {
             <section id="overview" className="mb-12">
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Ava - FSM Intake Agent</h1>
-                <p className="text-lg text-gray-600">AI-powered intake agent for Noetis FSM operating system with intelligent job routing and validation</p>
+                <p className="text-lg text-gray-600">AI-powered intake agent for JiveAI FSM operating system with intelligent job routing and validation</p>
               </div>
 
               {/* Status Cards */}

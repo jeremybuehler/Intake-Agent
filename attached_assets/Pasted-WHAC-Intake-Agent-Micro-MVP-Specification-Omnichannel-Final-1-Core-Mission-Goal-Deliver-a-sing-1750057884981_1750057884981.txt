@@ -1,0 +1,142 @@
+WHAC Intake Agent — Micro-MVP Specification (Omnichannel Final)
+1. Core Mission
+Goal:
+Deliver a single, structured intake system that auto-captures every customer request—via SMS, email, or phone/voice—organizes all details, and ensures no job is lost or duplicated, no matter how the customer contacts WHAC.
+2. Who & Why
+- Primary User: Nikki (Office Manager)
+- Backup Users: Dave (Owner), Step-Mom (Overflow)
+- Pain: Manual entry and multi-channel chaos (texts, emails, phone) = lost jobs, double work, customer frustration
+- Success: After 2 weeks, no more “lost” jobs, no more Excel re-entry, all intake routes visible in one place.
+3. Supported Intake Channels & Routing
+A. SMS Intake (Twilio)
+- Customer texts the dedicated WHAC Twilio number.
+- Message is captured via Twilio webhook and appears instantly as a “New Job” in the Intake Agent.
+- Key fields auto-filled: Contact (SMS sender), Problem/Details (SMS body), Time/Source (auto-captured).
+- Office manager reviews, adds missing info, and saves job.
+B. Email Intake (SendGrid)
+- Customer emails jobs@whac.com (or similar).
+- Email parsed via SendGrid and appears as a “New Job” in the Intake Agent.
+- Key fields auto-filled: Contact (from sender email), Problem/Details (email subject/body), Time/Source (auto-captured).
+- Office manager reviews, adds/fixes details, and saves job.
+Figure 1. SMS & Email Intake (Twilio/Sendgrid) flow
+
+C. Voice Intake (Twilio Voice, with Overflow + Transcription + IVR)
+- Customer calls the WHAC number (same as SMS).
+- Twilio receives the call and routes as follows:
+    - If Nikki (office manager) is available: Call is forwarded to Nikki’s phone/desk.
+    - If Nikki does not answer or is busy: Call automatically forwards to Dave, then Step-Mom (overflow order).
+- IVR answers if no live answer:
+    - “Thank you for calling WHAC. If you are requesting service, press 1. To leave a message for billing or general inquiries, press 2.”
+    - Press 1: Customer prompted to leave name, address, callback number, and description. Call is recorded and transcribed. Option to press 9 to request immediate callback.
+    - Press 2: Message routed to billing voicemail.
+- All calls are recorded and transcribed (Twilio service).
+- New “Voice Job” appears in Intake Agent: Contact (caller ID), Problem/Details (transcript), Time/Source (auto), Transcript/Recording (links).
+- Office manager reviews transcript, completes required fields (e.g., name/address), and saves job.
+Figure 2. Voice Intake (Twilio Voice, with Overflow + Transcription + IVR)
+
+
+D. Manual Entry (Phone or Incomplete Data)
+- Office manager uses Add Job form for phone/incomplete jobs.
+- All jobs have a 'Callback Requested' option if applicable.
+ Click here to for the User Stories & Workflow
+4. Data Fields for All Jobs 
+
+Field
+Type/Input
+Required
+Description / Notes
+Customer Name
+Text
+Yes
+Full name of customer
+Address
+Text + Map Link
+Yes
+Full address, with optional map link
+Phone/Email
+Text
+Yes
+Primary contact number or email
+Job Type
+Dropdown/Select
+Yes
+Install / Repair / Maint / Other
+Details
+Textarea (multi-line)
+Yes
+Brief job description or problem
+Urgency
+Radio Button/Dropdown
+Yes
+Normal / Urgent
+Source
+Auto/Dropdown
+Yes (Auto)
+SMS / Email / Voice / Manual
+Transcript/Recording
+Button/Link
+No (Voice)
+View transcript or play recording
+Notes
+Textarea (multi-line)
+No
+Internal notes
+Callback Requested
+Radio Button (Y/N)
+No
+Set via IVR, SMS, or manually
+Assigned Tech
+Dropdown/Select
+No
+To be assigned after intake
+
+
+5. UI/UX Details
+Add Job Form
+Figure 3. Add Job Form (Desktop/Tablet)
+
+Jobs List Table Example
+Job # | Customer | Job Type | Urgency | Status | Source  | Assigned Tech | Received    | Callback?
+----- | -------- | -------- | ------- | ------ | ------- | -------------| ----------- | ---------
+1235  | Jones    | Repair   | Urgent  | New    | Voice   | —            | 06/19 10:02 | Yes
+1236  | Smith    | Install  | Normal  | New    | SMS     | —            | 06/19 10:10 | No
+1237  | Lee      | Maint    | Normal  | New    | Email   | —            | 06/19 10:22 | No
+6. Workflow Diagram (Mermaid)
+flowchart TD
+    CallIn[Customer calls WHAC number] --> IVR{Is Nikki available?}
+    IVR -- Yes --> Nikki[Call routes to Nikki]
+    IVR -- No --> Menu[IVR answers: Service or Billing?]
+    Menu -- "Press 1: Service" --> Prompt[Prompt for details & callback option]
+    Prompt --> Record[Record + Transcribe]
+    Prompt --> CallBackQ[If '9', flag Callback Requested]
+    Record --> Intake[Intake Agent logs "Voice Job"]
+    CallBackQ --> Intake
+    Menu -- "Press 2: Billing" --> BillingVM[Voicemail to Billing]
+    Intake --> OfficeMgr[Office Manager reviews, calls back, marks as complete]
+
+    A1[Customer texts WHAC] --> B1[Twilio captures SMS]
+    B1 --> C1[Intake Agent auto-creates "New Job"]
+    C1 --> OfficeMgr
+    A2[Customer emails WHAC] --> B2[SendGrid parses email]
+    B2 --> C2[Intake Agent auto-creates "New Job"]
+    C2 --> OfficeMgr
+7. Acceptance Criteria
+- All SMS, email, and voice calls appear as new jobs within 1 minute of receipt.
+- Office manager can edit/complete required fields for any job.
+- Transcripts and recordings for voice jobs are attached and reviewable.
+- All jobs have source/received time auto-captured.
+- Office manager can export all job data to CSV at any time.
+- Callback requests are flagged and prioritized.
+- After two weeks, Excel/Calendar is only used for legacy data, not new intake.
+8. Out of Scope for MVP
+- No multi-layer IVR or complex routing trees.
+- No automated tech assignment.
+- No analytics/dashboards.
+- No inventory, quoting, or CRM integration.
+- No automated scheduling of callback time (all callbacks are ASAP/manual).
+9. Notes & Rationale
+- “Bloat-free”: All automations only assist; no jobs get created/assigned without office manager review.
+- Overflow routing for voice means no lost calls, and real coverage during peak/absence.
+- Transcription is included, but if transcript is unclear, recording is always available.
+- IVR is operator-first: efficient, not annoying, with structured service/billing split and callback option.
+- This platform can demo as “true omnichannel FSM intake” to any future customer.

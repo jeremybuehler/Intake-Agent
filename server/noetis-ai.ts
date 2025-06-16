@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export interface NoetisJobOutput {
+export interface JiveAIJobOutput {
   customer: {
     name: string;
     phone: string;
@@ -38,7 +38,7 @@ export interface NoetisJobOutput {
   };
 }
 
-// HVAC-specific job type mappings for Noetis FSM
+// HVAC-specific job type mappings for JiveAI FSM
 const HVAC_JOB_TYPES = {
   "AC Repair": "ac_repair",
   "AC Installation": "ac_install", 
@@ -80,12 +80,12 @@ export async function processJobWithAva(
   customerPhone: string,
   customerEmail?: string,
   address?: string
-): Promise<NoetisJobOutput> {
+): Promise<JiveAIJobOutput> {
   const startTime = Date.now();
 
   try {
-    // Enhanced AI prompt for Noetis FSM compliance
-    const prompt = `You are Ava, the AI Intake Agent for Noetis FSM Operating System. 
+    // Enhanced AI prompt for JiveAI FSM compliance
+    const prompt = `You are Ava, the AI Intake Agent for JiveAI FSM Operating System. 
     Analyze this HVAC service request and provide structured output for field service management.
 
     Customer Request: "${description}"
@@ -153,8 +153,8 @@ export async function processJobWithAva(
     
     const processingTime = Date.now() - startTime;
     
-    // Build Noetis-compliant output
-    const noetisOutput: NoetisJobOutput = {
+    // Build JiveAI-compliant output
+    const jiveAIOutput: JiveAIJobOutput = {
       customer: {
         name: customerName,
         phone: customerPhone,

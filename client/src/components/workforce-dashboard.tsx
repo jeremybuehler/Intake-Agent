@@ -66,7 +66,7 @@ export function WorkforceDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Noetis Mesh Agents</h2>
+          <h2 className="text-2xl font-bold text-gray-900">JiveAI Workforce Integration</h2>
           <p className="text-gray-600">Felix & Quinn Agent Status</p>
         </div>
         <div className="flex space-x-2">
