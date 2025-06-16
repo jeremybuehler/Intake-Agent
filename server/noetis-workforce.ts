@@ -137,9 +137,9 @@ export class JiveAIWorkforceIntegration {
     try {
       const notification = {
         notification_id: `fallback_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-        customer: noetisJob.customer,
+        customer: jiveAIJob.customer,
         reason,
-        job_details: noetisJob,
+        job_details: jiveAIJob,
         requires_manual_review: true,
         created_at: new Date().toISOString()
       };
@@ -200,22 +200,22 @@ export class JiveAIWorkforceIntegration {
     return equipmentMap[jobType] || ["basic_tools"];
   }
 
-  private buildSpecialInstructions(noetisJob: NoetisJobOutput): string {
+  private buildSpecialInstructions(jiveAIJob: JiveAIJobOutput): string {
     let instructions = [];
     
-    if (noetisJob.urgency === "emergency") {
+    if (jiveAIJob.urgency === "emergency") {
       instructions.push("EMERGENCY CALL - Priority dispatch required");
     }
     
-    if (noetisJob.tags.includes("elderly_residents")) {
+    if (jiveAIJob.tags.includes("elderly_residents")) {
       instructions.push("Elderly residents on site - exercise patience and clear communication");
     }
     
-    if (noetisJob.tags.includes("commercial")) {
+    if (jiveAIJob.tags.includes("commercial")) {
       instructions.push("Commercial property - coordinate with business hours");
     }
     
-    if (!noetisJob.location.validated) {
+    if (!jiveAIJob.location.validated) {
       instructions.push("Address requires verification - call customer to confirm location");
     }
 

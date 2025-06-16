@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { noetisJobOutputSchema } from "@shared/schema";
+import { jiveAIJobOutputSchema } from "@shared/schema";
 import { z } from "zod";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -180,7 +180,7 @@ export async function processJobWithAva(
     };
 
     // Validate against schema
-    return noetisJobOutputSchema.parse(jiveAIOutput);
+    return jiveAIJobOutputSchema.parse(jiveAIOutput);
 
   } catch (error) {
     console.error("Ava processing error:", error);
