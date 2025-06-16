@@ -1,4 +1,4 @@
-import { NoetisJobOutput } from "./noetis-ai";
+import { JiveAIJobOutput } from "./noetis-ai";
 
 // Noetis Mesh Agent: Felix (Field Execution & Logistics Integration eXpert)
 export interface FelixDispatchJob {
@@ -55,7 +55,7 @@ export interface QuinnQuoteRequest {
   updated_at: string;
 }
 
-export class NoetisWorkforceIntegration {
+export class JiveAIWorkforceIntegration {
   private felixApiUrl: string;
   private quinnApiUrl: string;
   private apiKey: string;
@@ -67,24 +67,24 @@ export class NoetisWorkforceIntegration {
   }
 
   // Route job to Felix (Field Execution & Logistics Agent)
-  async routeToFelix(noetisJob: NoetisJobOutput): Promise<FelixDispatchJob> {
+  async routeToFelix(jiveAIJob: JiveAIJobOutput): Promise<FelixDispatchJob> {
     try {
       const dispatchJob: FelixDispatchJob = {
         job_id: `dispatch_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-        customer: noetisJob.customer,
-        job_type: noetisJob.job_type,
-        urgency: noetisJob.urgency,
-        estimated_duration: this.estimateDuration(noetisJob.job_type, noetisJob.urgency),
-        required_skills: this.mapSkillsRequired(noetisJob.job_type, noetisJob.tags),
-        equipment_needed: this.mapEquipmentNeeded(noetisJob.job_type),
-        parts_list: noetisJob.tags.filter(tag => !["emergency", "residential", "commercial"].includes(tag)),
-        special_instructions: this.buildSpecialInstructions(noetisJob),
+        customer: jiveAIJob.customer,
+        job_type: jiveAIJob.job_type,
+        urgency: jiveAIJob.urgency,
+        estimated_duration: this.estimateDuration(jiveAIJob.job_type, jiveAIJob.urgency),
+        required_skills: this.mapSkillsRequired(jiveAIJob.job_type, jiveAIJob.tags),
+        equipment_needed: this.mapEquipmentNeeded(jiveAIJob.job_type),
+        parts_list: jiveAIJob.tags.filter((tag: string) => !["emergency", "residential", "commercial"].includes(tag)),
+        special_instructions: this.buildSpecialInstructions(jiveAIJob),
         location: {
-          address: noetisJob.address,
-          zone: noetisJob.location.zone || "default",
-          coordinates: noetisJob.location.coordinates
+          address: jiveAIJob.address,
+          zone: jiveAIJob.location.zone || "default",
+          coordinates: jiveAIJob.location.coordinates
         },
-        priority_score: this.calculatePriorityScore(noetisJob.urgency, noetisJob.tags),
+        priority_score: this.calculatePriorityScore(jiveAIJob.urgency, jiveAIJob.tags),
         dispatch_status: "pending",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -103,16 +103,16 @@ export class NoetisWorkforceIntegration {
   }
 
   // Route job to Quinn (Quote & Upselling Intelligence Agent)
-  async routeToQuinn(noetisJob: NoetisJobOutput): Promise<QuinnQuoteRequest> {
+  async routeToQuinn(jiveAIJob: JiveAIJobOutput): Promise<QuinnQuoteRequest> {
     try {
       const quoteRequest: QuinnQuoteRequest = {
         quote_id: `quote_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-        customer: noetisJob.customer,
-        job_type: noetisJob.job_type,
-        description: noetisJob.notes,
-        complexity: this.assessComplexity(noetisJob.job_type, noetisJob.tags),
-        estimated_parts: this.estimateParts(noetisJob.job_type, noetisJob.tags),
-        estimated_labor_hours: this.estimateLaborHours(noetisJob.job_type),
+        customer: jiveAIJob.customer,
+        job_type: jiveAIJob.job_type,
+        description: jiveAIJob.notes,
+        complexity: this.assessComplexity(jiveAIJob.job_type, jiveAIJob.tags),
+        estimated_parts: this.estimateParts(jiveAIJob.job_type, jiveAIJob.tags),
+        estimated_labor_hours: this.estimateLaborHours(jiveAIJob.job_type),
         estimated_total: 0, // Will be calculated by quote system
         quote_status: "pending",
         valid_until: this.getQuoteValidUntil(),
@@ -133,7 +133,7 @@ export class NoetisWorkforceIntegration {
   }
 
   // Send fallback notification for jobs outside coverage or requiring manual review
-  async sendFallbackNotification(noetisJob: NoetisJobOutput, reason: string): Promise<{success: boolean, notification_id: string}> {
+  async sendFallbackNotification(jiveAIJob: JiveAIJobOutput, reason: string): Promise<{success: boolean, notification_id: string}> {
     try {
       const notification = {
         notification_id: `fallback_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
@@ -347,4 +347,4 @@ export class NoetisWorkforceIntegration {
   }
 }
 
-export const workforceIntegration = new NoetisWorkforceIntegration();
+export const workforceIntegration = new JiveAIWorkforceIntegration();

@@ -180,7 +180,7 @@ export async function processJobWithAva(
     };
 
     // Validate against schema
-    return noetisJobOutputSchema.parse(noetisOutput);
+    return noetisJobOutputSchema.parse(jiveAIOutput);
 
   } catch (error) {
     console.error("Ava processing error:", error);
@@ -311,7 +311,7 @@ function createFallbackOutput(
   customerEmail?: string,
   address?: string,
   processingTime?: number
-): NoetisJobOutput {
+): JiveAIJobOutput {
   return {
     customer: {
       name: extractCustomerName(customerInfo),
