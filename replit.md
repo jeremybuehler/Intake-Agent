@@ -1,104 +1,175 @@
-# Meridian FSM - Maya Intake Agent
+# JiveAI FSM Intake Agent - Project Documentation
 
 ## Overview
+JiveAI is a headless AI-powered Field Service Management (FSM) intake system that processes unstructured service requests from multiple channels and uses OpenAI GPT-4o to create FSM-compliant job records with intelligent routing to autonomous agents Felix and Quinn.
 
-This is a comprehensive AI-powered field service intake agent called "Maya" built for Meridian FSM. The system processes unstructured job requests from multiple channels (SMS/Twilio, webhooks, voice calls) and transforms them into enriched, structured job records using OpenAI GPT-4o. The application features a React-based dashboard for monitoring, configuration, and testing.
+**Current Status:** Production Ready - SMS intake fully operational with autonomous AI processing and workforce routing.
 
-## System Architecture
+## Recent Changes
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS with shadcn/ui component library
-- **Routing**: Wouter for client-side routing
-- **State Management**: TanStack Query for server state management
-- **Build Tool**: Vite with custom configuration
+### December 24, 2025 - Complete JiveAI Rebranding
+- Successfully reverted all Noetis branding back to JiveAI throughout the entire system
+- Updated frontend components: dashboard header, workforce dashboard, and navigation
+- Fixed TypeScript interfaces and schema references across all server files
+- Corrected AI processing function names and variable references
+- System now running successfully with consistent JiveAI branding
+- All API endpoints responding properly with Felix and Quinn agent integration active
 
-### Backend Architecture
-- **Runtime**: Node.js 20 with Express.js
-- **Language**: TypeScript with ES Modules
-- **API Design**: RESTful endpoints with comprehensive error handling
-- **Middleware**: Custom logging, request parsing, and error handling
+### Previous Milestones
+- Implemented SMS intake with Twilio webhook integration
+- Deployed Ava AI processing engine with GPT-4o
+- Integrated Felix Agent for emergency dispatch operations
+- Integrated Quinn Agent for quote generation and sales opportunities
+- Built real-time monitoring dashboard with live metrics
 
-### Database Architecture
-- **Database**: PostgreSQL with connection pooling
-- **ORM**: Drizzle ORM with TypeScript-first schema definitions
-- **Migrations**: Automated database migrations with Drizzle Kit
-- **Tables**: Users, job records, Twilio configuration with proper indexing
+## Project Architecture
 
-## Key Components
+### Core Components
+- **Ava (AI Intake Agent):** Primary AI processor using OpenAI GPT-4o
+- **Felix Agent:** Field Execution & Logistics Integration eXpert for dispatch
+- **Quinn Agent:** Quote & Upselling Intelligence Network Navigator
+- **Workforce Dashboard:** Real-time monitoring and system status
 
-### AI Processing Engine (Maya)
-- **Primary Agent**: Maya (Meridian Analysis, Yield & Automation agent)
-- **AI Model**: OpenAI GPT-4o for job enrichment and classification
-- **Processing**: Service type classification, urgency assessment, parts prediction
-- **Output**: Structured job records with confidence scores and metadata
+### Technology Stack
+- **Backend:** Node.js + TypeScript + Express.js + Drizzle ORM
+- **Frontend:** React + TypeScript + Vite + TanStack Query + shadcn/ui
+- **Database:** PostgreSQL (Replit built-in)
+- **AI:** OpenAI GPT-4o API
+- **Communications:** Twilio (SMS/Voice), SendGrid (Email - planned)
 
-### Multi-Channel Intake System
-- **SMS Processing**: Twilio webhook integration with automatic job creation
-- **Voice Handling**: Call recording, transcription, and job conversion
-- **Webhook API**: Direct integration endpoint for web forms and external systems
-- **Manual Entry**: Dashboard-based job creation and testing
+### Current Capabilities
+- SMS intake with automatic job creation and routing
+- AI-powered service request analysis and classification
+- Autonomous routing to Felix (dispatch) or Quinn (quotes) agents
+- Real-time performance monitoring and metrics collection
+- Database persistence with audit trails
 
-### Workforce Integration (Future Migration)
-- **Felix Agent**: Dispatch queue management and technician routing
-- **Quinn Agent**: Quote generation and upselling intelligence
-- **Routing Logic**: Intelligent job routing based on complexity and type
+## WHAC Integration Analysis
 
-### Monitoring & Analytics
-- **Real-time Metrics**: Job processing statistics, confidence scores, response times
-- **System Health**: Database connectivity, API status, performance monitoring
-- **Alerting**: Automated alert system for service degradation
-- **Dashboard**: Comprehensive admin interface with multiple tabs
+### Compatibility Assessment
+The current JiveAI system architecture provides a solid foundation for WHAC requirements but needs workflow modifications:
 
-## Data Flow
+**Current:** AI-first autonomous routing
+**WHAC Needs:** Human-supervised intake with manual review
 
-1. **Input Reception**: Multi-channel job requests received via SMS, voice, or webhook
-2. **Data Validation**: Input validation using Zod schemas
-3. **AI Processing**: Maya analyzes and enriches job data using GPT-4o
-4. **Database Storage**: Structured job records stored in PostgreSQL
-5. **Response Generation**: Formatted responses sent back to requesters
-6. **Monitoring**: Metrics collected and displayed in real-time dashboard
+### Required Additions for WHAC
+1. **Email Integration:** SendGrid webhook for jobs@whac.com
+2. **Voice System:** Twilio Voice with IVR and call forwarding
+3. **Manual Entry Interface:** Office manager job creation form
+4. **Review Queue:** Human approval workflow before job completion
+5. **Table Interface:** Jobs list view with filtering and bulk actions
+6. **Export Functionality:** CSV export for Excel integration
 
-## External Dependencies
-
-### Core Services
-- **OpenAI API**: GPT-4o model for intelligent job processing
-- **Twilio**: SMS and voice communication services
-- **PostgreSQL**: Primary database for persistent storage
-- **SendGrid**: Email service integration (configured but not fully implemented)
-
-### Development & Deployment
-- **Replit**: Primary development and hosting platform
-- **Node.js**: Runtime environment with ES module support
-- **NPM**: Package management and dependency resolution
-
-## Deployment Strategy
-
-### Production Environment
-- **Platform**: Replit with auto-scaling deployment
-- **Build Process**: Vite frontend build + esbuild backend compilation
-- **Environment**: Production configuration with environment variables
-- **Scaling**: Automatic scaling based on demand
-
-### Configuration Management
-- **Environment Variables**: Secure credential management
-- **Dynamic Config**: Runtime configuration updates through dashboard
-- **Health Checks**: Automated service monitoring and recovery
-
-### Database Strategy
-- **Connection Pooling**: Efficient database connection management
-- **Migration System**: Automated schema updates with Drizzle
-- **Backup Strategy**: Built on Replit's infrastructure reliability
-
-## Changelog
-
-```
-Changelog:
-- June 24, 2025. Initial setup
-```
+### Implementation Strategy
+- Dual-mode operation supporting both autonomous and supervised workflows
+- Configuration-driven routing (auto vs manual review)
+- Backward compatibility with existing Felix/Quinn agent integration
+- Gradual feature rollout maintaining current system stability
 
 ## User Preferences
+- Maintain JiveAI branding consistency across all components
+- Prioritize system stability and production readiness
+- Focus on clear, technical documentation for developer handoffs
+- Preserve existing SMS workflow while adding new channels
+- Support both autonomous and human-supervised operational modes
 
-```
-Preferred communication style: Simple, everyday language.
-```
+## Technical Decisions
+
+### Database Strategy
+- Using Replit built-in PostgreSQL for simplicity and reliability
+- Drizzle ORM provides type safety and migration management
+- Schema designed for FSM compliance with audit capabilities
+
+### AI Processing Architecture
+- OpenAI GPT-4o for primary job analysis and classification
+- Structured JSON output with Zod validation
+- Confidence scoring for routing decisions
+- Fallback handling for processing errors
+
+### Frontend Architecture
+- React with TypeScript for type safety
+- TanStack Query for API state management
+- shadcn/ui components for consistent design system
+- Responsive design supporting desktop and tablet interfaces
+
+### API Design
+- RESTful endpoints with clear resource naming
+- Webhook compatibility for external service integration
+- Comprehensive error handling and status codes
+- Real-time updates via polling (WebSocket upgrade planned)
+
+## Development Guidelines
+
+### Code Quality Standards
+- TypeScript strict mode for all components
+- Zod schemas for all data validation
+- Error boundary components for graceful failure handling
+- Comprehensive logging for debugging and monitoring
+
+### Security Practices
+- Environment variables for all sensitive configuration
+- Input validation on all API endpoints
+- Webhook signature verification for external services
+- Database connection encryption and pooling
+
+### Performance Considerations
+- Database query optimization with proper indexing
+- API response caching where appropriate
+- OpenAI rate limiting and retry logic
+- Frontend bundle optimization with code splitting
+
+## Deployment Configuration
+
+### Environment Requirements
+- **Database:** PostgreSQL with Drizzle schema
+- **Secrets:** OpenAI API key, Twilio credentials, SendGrid API key
+- **Compute:** Node.js 20.x runtime with TypeScript support
+- **Networking:** HTTPS endpoints for webhook integration
+
+### Monitoring Setup
+- Real-time performance metrics collection
+- Error logging with stack trace capture
+- API response time tracking
+- Database connection health monitoring
+
+## Next Development Priorities
+
+### Immediate (Current Sprint)
+1. Complete system documentation and developer handoff materials
+2. Validate all existing functionality remains stable
+3. Prepare architecture for WHAC integration requirements
+
+### Short Term (Next 2-4 weeks)
+1. Email intake implementation with SendGrid
+2. Manual job entry interface for office manager use
+3. Review queue workflow for human-supervised operations
+
+### Medium Term (1-2 months)
+1. Twilio Voice integration with IVR system
+2. Call forwarding hierarchy implementation
+3. Advanced reporting and analytics dashboard
+
+### Long Term (3+ months)
+1. Multi-tenant support for additional clients
+2. Advanced AI features (sentiment analysis, priority scoring)
+3. Mobile application for field technician access
+
+## Troubleshooting Guide
+
+### Common Issues
+- **SMS Processing Delays:** Check OpenAI API response times and Twilio webhook timeouts
+- **Database Connection Errors:** Verify environment variables and connection pooling
+- **AI Processing Failures:** Monitor confidence scores and implement fallback logic
+- **Frontend Loading Issues:** Check API endpoint availability and CORS configuration
+
+### Debugging Tools
+- Built-in API tester component for endpoint validation
+- Real-time metrics dashboard for performance monitoring
+- Database query execution tool for data analysis
+- Comprehensive logging with request/response tracking
+
+---
+
+**Maintained by:** Replit Agent  
+**Last Updated:** December 24, 2025  
+**Version:** 2.0 (Post-JiveAI Rebranding)
