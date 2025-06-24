@@ -1,6 +1,7 @@
-import { JiveAIJobOutput } from "./noetis-ai";
 
-// Noetis Mesh Agent: Felix (Field Execution & Logistics Integration eXpert)
+import { MeridianJobOutput } from "./noetis-ai";
+
+// Meridian Mesh Agent: Felix (Field Execution & Logistics Integration eXpert)
 export interface FelixDispatchJob {
   job_id: string;
   customer: {
@@ -29,7 +30,7 @@ export interface FelixDispatchJob {
   updated_at: string;
 }
 
-// Noetis Mesh Agent: Quinn (Quote & Upselling Intelligence Network Navigator)
+// Meridian Mesh Agent: Quinn (Quote & Upselling Intelligence Network Navigator)
 export interface QuinnQuoteRequest {
   quote_id: string;
   customer: {
@@ -55,36 +56,36 @@ export interface QuinnQuoteRequest {
   updated_at: string;
 }
 
-export class JiveAIWorkforceIntegration {
+export class MeridianWorkforceIntegration {
   private felixApiUrl: string;
   private quinnApiUrl: string;
   private apiKey: string;
 
   constructor() {
-    this.felixApiUrl = process.env.FELIX_MESH_URL || "https://felix.noetis.mesh/api/dispatch";
-    this.quinnApiUrl = process.env.QUINN_MESH_URL || "https://quinn.noetis.mesh/api/quotes";
-    this.apiKey = process.env.NOETIS_MESH_KEY || "mesh_agent_key";
+    this.felixApiUrl = process.env.FELIX_MESH_URL || "https://felix.meridian.mesh/api/dispatch";
+    this.quinnApiUrl = process.env.QUINN_MESH_URL || "https://quinn.meridian.mesh/api/quotes";
+    this.apiKey = process.env.MERIDIAN_MESH_KEY || "mesh_agent_key";
   }
 
   // Route job to Felix (Field Execution & Logistics Agent)
-  async routeToFelix(jiveAIJob: JiveAIJobOutput): Promise<FelixDispatchJob> {
+  async routeToFelix(meridianJob: MeridianJobOutput): Promise<FelixDispatchJob> {
     try {
       const dispatchJob: FelixDispatchJob = {
         job_id: `dispatch_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-        customer: jiveAIJob.customer,
-        job_type: jiveAIJob.job_type,
-        urgency: jiveAIJob.urgency,
-        estimated_duration: this.estimateDuration(jiveAIJob.job_type, jiveAIJob.urgency),
-        required_skills: this.mapSkillsRequired(jiveAIJob.job_type, jiveAIJob.tags),
-        equipment_needed: this.mapEquipmentNeeded(jiveAIJob.job_type),
-        parts_list: jiveAIJob.tags.filter((tag: string) => !["emergency", "residential", "commercial"].includes(tag)),
-        special_instructions: this.buildSpecialInstructions(jiveAIJob),
+        customer: meridianJob.customer,
+        job_type: meridianJob.job_type,
+        urgency: meridianJob.urgency,
+        estimated_duration: this.estimateDuration(meridianJob.job_type, meridianJob.urgency),
+        required_skills: this.mapSkillsRequired(meridianJob.job_type, meridianJob.tags),
+        equipment_needed: this.mapEquipmentNeeded(meridianJob.job_type),
+        parts_list: meridianJob.tags.filter((tag: string) => !["emergency", "residential", "commercial"].includes(tag)),
+        special_instructions: this.buildSpecialInstructions(meridianJob),
         location: {
-          address: jiveAIJob.address,
-          zone: jiveAIJob.location.zone || "default",
-          coordinates: jiveAIJob.location.coordinates
+          address: meridianJob.address,
+          zone: meridianJob.location.zone || "default",
+          coordinates: meridianJob.location.coordinates
         },
-        priority_score: this.calculatePriorityScore(jiveAIJob.urgency, jiveAIJob.tags),
+        priority_score: this.calculatePriorityScore(meridianJob.urgency, meridianJob.tags),
         dispatch_status: "pending",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -93,7 +94,7 @@ export class JiveAIWorkforceIntegration {
       // Send to Felix Agent
       const response = await this.sendToFelix(dispatchJob);
       
-      console.log(`Job routed to Noetis Dispatch (Mill): ${dispatchJob.job_id}`);
+      console.log(`Job routed to Meridian Dispatch (Felix): ${dispatchJob.job_id}`);
       return response;
 
     } catch (error) {
@@ -103,16 +104,16 @@ export class JiveAIWorkforceIntegration {
   }
 
   // Route job to Quinn (Quote & Upselling Intelligence Agent)
-  async routeToQuinn(jiveAIJob: JiveAIJobOutput): Promise<QuinnQuoteRequest> {
+  async routeToQuinn(meridianJob: MeridianJobOutput): Promise<QuinnQuoteRequest> {
     try {
       const quoteRequest: QuinnQuoteRequest = {
         quote_id: `quote_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-        customer: jiveAIJob.customer,
-        job_type: jiveAIJob.job_type,
-        description: jiveAIJob.notes,
-        complexity: this.assessComplexity(jiveAIJob.job_type, jiveAIJob.tags),
-        estimated_parts: this.estimateParts(jiveAIJob.job_type, jiveAIJob.tags),
-        estimated_labor_hours: this.estimateLaborHours(jiveAIJob.job_type),
+        customer: meridianJob.customer,
+        job_type: meridianJob.job_type,
+        description: meridianJob.notes,
+        complexity: this.assessComplexity(meridianJob.job_type, meridianJob.tags),
+        estimated_parts: this.estimateParts(meridianJob.job_type, meridianJob.tags),
+        estimated_labor_hours: this.estimateLaborHours(meridianJob.job_type),
         estimated_total: 0, // Will be calculated by quote system
         quote_status: "pending",
         valid_until: this.getQuoteValidUntil(),
@@ -133,13 +134,13 @@ export class JiveAIWorkforceIntegration {
   }
 
   // Send fallback notification for jobs outside coverage or requiring manual review
-  async sendFallbackNotification(jiveAIJob: JiveAIJobOutput, reason: string): Promise<{success: boolean, notification_id: string}> {
+  async sendFallbackNotification(meridianJob: MeridianJobOutput, reason: string): Promise<{success: boolean, notification_id: string}> {
     try {
       const notification = {
         notification_id: `fallback_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-        customer: jiveAIJob.customer,
+        customer: meridianJob.customer,
         reason,
-        job_details: jiveAIJob,
+        job_details: meridianJob,
         requires_manual_review: true,
         created_at: new Date().toISOString()
       };
@@ -200,22 +201,22 @@ export class JiveAIWorkforceIntegration {
     return equipmentMap[jobType] || ["basic_tools"];
   }
 
-  private buildSpecialInstructions(jiveAIJob: JiveAIJobOutput): string {
+  private buildSpecialInstructions(meridianJob: MeridianJobOutput): string {
     let instructions = [];
     
-    if (jiveAIJob.urgency === "emergency") {
+    if (meridianJob.urgency === "emergency") {
       instructions.push("EMERGENCY CALL - Priority dispatch required");
     }
     
-    if (jiveAIJob.tags.includes("elderly_residents")) {
+    if (meridianJob.tags.includes("elderly_residents")) {
       instructions.push("Elderly residents on site - exercise patience and clear communication");
     }
     
-    if (jiveAIJob.tags.includes("commercial")) {
+    if (meridianJob.tags.includes("commercial")) {
       instructions.push("Commercial property - coordinate with business hours");
     }
     
-    if (!jiveAIJob.location.validated) {
+    if (!meridianJob.location.validated) {
       instructions.push("Address requires verification - call customer to confirm location");
     }
 
@@ -292,9 +293,9 @@ export class JiveAIWorkforceIntegration {
   }
 
   private async sendToFelix(dispatchJob: FelixDispatchJob): Promise<FelixDispatchJob> {
-    // In production, this would make actual HTTP requests to Mill API
+    // In production, this would make actual HTTP requests to Felix API
     try {
-      console.log(`Sending job to Mill Dispatch: ${JSON.stringify(dispatchJob, null, 2)}`);
+      console.log(`Sending job to Felix Dispatch: ${JSON.stringify(dispatchJob, null, 2)}`);
       
       // Simulate API call
       const response = await this.simulateFelixResponse(dispatchJob);
@@ -306,9 +307,9 @@ export class JiveAIWorkforceIntegration {
   }
 
   private async sendToQuinn(quoteRequest: QuinnQuoteRequest): Promise<QuinnQuoteRequest> {
-    // In production, this would make actual HTTP requests to Quote API
+    // In production, this would make actual HTTP requests to Quinn API
     try {
-      console.log(`Sending job to Quote System: ${JSON.stringify(quoteRequest, null, 2)}`);
+      console.log(`Sending job to Quinn System: ${JSON.stringify(quoteRequest, null, 2)}`);
       
       // Simulate API call
       const response = await this.simulateQuinnResponse(quoteRequest);
@@ -347,4 +348,4 @@ export class JiveAIWorkforceIntegration {
   }
 }
 
-export const workforceIntegration = new JiveAIWorkforceIntegration();
+export const workforceIntegration = new MeridianWorkforceIntegration();

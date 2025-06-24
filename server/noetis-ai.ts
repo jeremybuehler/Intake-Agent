@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export interface JiveAIJobOutput {
+export interface MeridianJobOutput {
   customer: {
     name: string;
     phone: string;
@@ -38,7 +38,7 @@ export interface JiveAIJobOutput {
   };
 }
 
-// HVAC-specific job type mappings for JiveAI FSM
+// HVAC-specific job type mappings for Meridian FSM
 const HVAC_JOB_TYPES = {
   "AC Repair": "ac_repair",
   "AC Installation": "ac_install", 
@@ -74,18 +74,18 @@ const SERVICE_ZONES = {
   "zone_5": { name: "West District", serviceable: true }
 };
 
-export async function processJobWithAva(
+export async function processJobWithMaya(
   description: string,
   customerInfo: string,
   customerPhone: string,
   customerEmail?: string,
   address?: string
-): Promise<JiveAIJobOutput> {
+): Promise<MeridianJobOutput> {
   const startTime = Date.now();
 
   try {
     // Enhanced AI prompt for JiveAI FSM compliance
-    const prompt = `You are Ava, the AI Intake Agent for JiveAI FSM Operating System. 
+    const prompt = `You are Maya, the AI Intake Agent for Meridian FSM Operating System. 
     Analyze this HVAC service request and provide structured output for field service management.
 
     Customer Request: "${description}"
@@ -153,8 +153,8 @@ export async function processJobWithAva(
     
     const processingTime = Date.now() - startTime;
     
-    // Build JiveAI-compliant output
-    const jiveAIOutput: JiveAIJobOutput = {
+    // Build Meridian-compliant output
+    const meridianOutput: MeridianJobOutput = {
       customer: {
         name: customerName,
         phone: customerPhone,
@@ -180,10 +180,10 @@ export async function processJobWithAva(
     };
 
     // Validate against schema
-    return jiveAIJobOutputSchema.parse(jiveAIOutput);
+    return meridianJobOutputSchema.parse(meridianOutput);
 
   } catch (error) {
-    console.error("Ava processing error:", error);
+    console.error("Maya processing error:", error);
     
     // Fallback output for errors
     return createFallbackOutput(description, customerInfo, customerPhone, customerEmail, address, Date.now() - startTime);
@@ -311,7 +311,7 @@ function createFallbackOutput(
   customerEmail?: string,
   address?: string,
   processingTime?: number
-): JiveAIJobOutput {
+): MeridianJobOutput {
   return {
     customer: {
       name: extractCustomerName(customerInfo),

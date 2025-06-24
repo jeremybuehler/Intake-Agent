@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
 import { enrichJobData } from "./openai";
-import { processJobWithAva } from "./noetis-ai";
+import { processJobWithMaya } from "./noetis-ai";
 import { workforceIntegration } from "./noetis-workforce";
 import { z } from "zod";
 import { connectionManager } from "./connection-manager";
@@ -34,8 +34,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Prepare customer info for Ava's analysis
       const customerInfo = `Name: ${validatedInput.customer_name}, Phone: ${validatedInput.customer_phone}, Address: ${validatedInput.address}`;
       
-      // Process with Ava for Noetis FSM compliance
-      const noetisResult = await processJobWithAva(
+      // Process with Maya for Meridian FSM compliance
+      const meridianResult = await processJobWithMaya(
         validatedInput.description,
         customerInfo,
         validatedInput.customer_phone,
@@ -46,45 +46,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const processingTime = Date.now() - startTime;
       
       // Record successful job processing metrics
-      simpleMonitoring.recordJobSuccess(processingTime, noetisResult.confidence);
+      simpleMonitoring.recordJobSuccess(processingTime, meridianResult.confidence);
       
       // Create job record for storage (maintaining backwards compatibility)
       const jobRecord = {
         job_id: jobId,
-        customer_name: noetisResult.customer.name,
-        customer_phone: noetisResult.customer.phone,
-        customer_email: noetisResult.customer.email || null,
-        customer_address: noetisResult.customer.address,
-        service_type: noetisResult.job_type,
+        customer_name: meridianResult.customer.name,
+        customer_phone: meridianResult.customer.phone,
+        customer_email: meridianResult.customer.email || null,
+        customer_address: meridianResult.customer.address,
+        service_type: meridianResult.job_type,
         description: validatedInput.description,
-        ai_summary: noetisResult.notes,
-        issue_type: noetisResult.job_type,
-        urgency: noetisResult.urgency,
-        potential_parts: noetisResult.tags,
+        ai_summary: meridianResult.notes,
+        issue_type: meridianResult.job_type,
+        urgency: meridianResult.urgency,
+        potential_parts: meridianResult.tags,
         preferred_time: validatedInput.preferred_time || null,
         source: validatedInput.source,
         submitted_at: new Date(),
         status: "pending_intake" as const,
-        ai_confidence: noetisResult.confidence,
+        ai_confidence: meridianResult.confidence,
         processing_time_ms: processingTime,
       };
 
       // Store the job record
       await storage.createJobRecord(jobRecord);
 
-      // Route to appropriate Noetis workforce system
+      // Route to appropriate Meridian workforce system
       let workforceResponse = null;
       try {
-        if (noetisResult.route_to === "dispatch_queue") {
-          workforceResponse = await workforceIntegration.routeToFelix(noetisResult);
+        if (meridianResult.route_to === "dispatch_queue") {
+          workforceResponse = await workforceIntegration.routeToFelix(meridianResult);
           console.log(`Job routed to Felix Agent: ${workforceResponse.job_id}`);
-        } else if (noetisResult.route_to === "quote_queue") {
-          workforceResponse = await workforceIntegration.routeToQuinn(noetisResult);
+        } else if (meridianResult.route_to === "quote_queue") {
+          workforceResponse = await workforceIntegration.routeToQuinn(meridianResult);
           console.log(`Job routed to Quinn Agent: ${workforceResponse.quote_id}`);
-        } else if (noetisResult.route_to === "fallback_notification") {
-          const fallbackReason = !noetisResult.location.serviceable ? 
+        } else if (meridianResult.route_to === "fallback_notification") {
+          const fallbackReason = !meridianResult.location.serviceable ? 
             "Outside service area" : "Requires manual review";
-          workforceResponse = await workforceIntegration.sendFallbackNotification(noetisResult, fallbackReason);
+          workforceResponse = await workforceIntegration.sendFallbackNotification(meridianResult, fallbackReason);
           console.log(`Fallback notification sent: ${workforceResponse.notification_id}`);
         }
       } catch (error) {
@@ -92,11 +92,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Continue with response even if workforce routing fails
       }
 
-      // Return enhanced Noetis response with workforce routing info
+      // Return enhanced Meridian response with workforce routing info
       const enhancedResponse = {
-        ...noetisResult,
+        ...meridianResult,
         workforce_routing: {
-          routed_to: noetisResult.route_to,
+          routed_to: meridianResult.route_to,
           workforce_id: workforceResponse ? 
             ('job_id' in workforceResponse) ? workforceResponse.job_id : 
             ('quote_id' in workforceResponse) ? workforceResponse.quote_id : 
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(enhancedResponse);
 
     } catch (error) {
-      console.error("Ava processing error:", error);
+      console.error("Maya processing error:", error);
       
       // Record failed job processing
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";

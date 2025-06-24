@@ -1,6 +1,6 @@
-# JiveAI Intake Agent
+# Meridian FSM - Maya Intake Agent
 
-A headless AI-powered intake agent for field service automation that processes unstructured job data from multiple channels and returns enriched JobRecords using OpenAI GPT-4o.
+A headless AI-powered intake agent for field service automation that processes unstructured job data from multiple channels and returns enriched JobRecords using OpenAI GPT-4o with precision navigation and routing.
 
 ## Features
 

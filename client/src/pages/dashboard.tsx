@@ -28,11 +28,11 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">JA</span>
+                  <span className="text-white font-bold text-sm">M</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">JiveAI</h1>
-                  <p className="text-xs text-gray-500">Ava - Intake Agent</p>
+                  <h1 className="text-lg font-semibold text-gray-900">Meridian FSM</h1>
+                  <p className="text-xs text-gray-500">Maya - Intake Agent</p>
                 </div>
               </div>
             </div>

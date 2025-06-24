@@ -60,8 +60,8 @@ export const rawJobIntakeSchema = z.object({
   source: z.enum(["Webhook", "SMS", "Phone Call", "Email", "FSM API", "Manual Upload"]).default("Webhook"),
 });
 
-// JiveAI FSM-compliant output schema for Ava
-export const jiveAIJobOutputSchema = z.object({
+// Meridian FSM-compliant output schema for Maya
+export const meridianJobOutputSchema = z.object({
   customer: z.object({
     name: z.string(),
     phone: z.string(),
