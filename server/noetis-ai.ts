@@ -85,7 +85,7 @@ export async function processJobWithAva(
 
   try {
     // Enhanced AI prompt for JiveAI FSM compliance
-    const prompt = `You are Maya, the AI Intake Agent for Meridian FSM Operating System. 
+    const prompt = `You are Ava, the AI Intake Agent for JiveAI FSM Operating System. 
     Analyze this HVAC service request and provide structured output for field service management.
 
     Customer Request: "${description}"
