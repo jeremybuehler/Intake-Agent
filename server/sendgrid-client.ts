@@ -56,7 +56,7 @@ export interface SendGridStats {
 }
 
 export class SendGridService {
-  
+
   async sendEmail(
     to: string, 
     from: string, 
@@ -74,7 +74,7 @@ export class SendGridService {
       };
 
       const [response] = await sgMail.send(msg);
-      
+
       return {
         id: response.headers['x-message-id'] || 'unknown',
         to,
@@ -103,7 +103,7 @@ export class SendGridService {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Service Request Confirmed</h2>
         <p>Thank you for contacting JiveAI! We've received your service request and our team is reviewing it.</p>
-        
+
         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #374151;">Request Details</h3>
           <p><strong>Job ID:</strong> ${jobId}</p>
@@ -111,9 +111,9 @@ export class SendGridService {
           <p><strong>Priority:</strong> <span style="color: ${urgency === 'high' ? '#dc2626' : urgency === 'medium' ? '#d97706' : '#16a34a'};">${urgency.toUpperCase()}</span></p>
           <p><strong>Summary:</strong> ${summary}</p>
         </div>
-        
+
         <p>Our team will contact you shortly to schedule your service appointment.</p>
-        
+
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
           <p>This is an automated message from JiveAI Service Management System.</p>
         </div>
@@ -135,7 +135,7 @@ Our team will contact you shortly to schedule your service appointment.
 
     return this.sendEmail(
       customerEmail,
-      'noreply@jiveai.com',
+      'noreply@meridianfsm.com',
       subject,
       text,
       html
@@ -148,10 +148,10 @@ Our team will contact you shortly to schedule your service appointment.
       // For now, return mock structure - in production you'd call the actual API
       const today = new Date();
       const thirtyDaysAgo = startDate || new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-      
+
       // This would be replaced with actual SendGrid API call:
       // const response = await sgMail.getStats({ start_date: startDate, end_date: endDate });
-      
+
       return [{
         date: today.toISOString().split('T')[0],
         stats: [{
@@ -186,7 +186,7 @@ Our team will contact you shortly to schedule your service appointment.
       // Test by attempting to send to a test email
       await this.sendEmail(
         'test@test.com',
-        'noreply@jiveai.com',
+        'noreply@meridianfsm.com',
         'Connection Test',
         'This is a connection test',
         '<p>This is a connection test</p>'
@@ -202,13 +202,13 @@ Our team will contact you shortly to schedule your service appointment.
     try {
       // Extract email content and create job
       const { from, subject, text, html } = emailData;
-      
+
       // Use AI to process the email content
       const description = text || html || subject;
-      
+
       // Generate job ID
       const jobId = `job_${new Date().getFullYear()}_${String(Date.now()).slice(-6)}`;
-      
+
       return jobId;
     } catch (error) {
       console.error('Error processing inbound email:', error);
