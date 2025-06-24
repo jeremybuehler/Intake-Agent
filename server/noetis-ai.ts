@@ -74,18 +74,18 @@ const SERVICE_ZONES = {
   "zone_5": { name: "West District", serviceable: true }
 };
 
-export async function processJobWithAva(
+export async function processJobWithMaya(
   description: string,
   customerInfo: string,
   customerPhone: string,
   customerEmail?: string,
   address?: string
-): Promise<JiveAIJobOutput> {
+): Promise<MeridianJobOutput> {
   const startTime = Date.now();
 
   try {
     // Enhanced AI prompt for JiveAI FSM compliance
-    const prompt = `You are Ava, the AI Intake Agent for JiveAI FSM Operating System. 
+    const prompt = `You are Maya, the AI Intake Agent for Meridian FSM Operating System. 
     Analyze this HVAC service request and provide structured output for field service management.
 
     Customer Request: "${description}"

@@ -1,7 +1,6 @@
-
 # Meridian FSM - Maya Intake Agent
 
-A headless AI-powered intake agent for field service automation that processes unstructured job data from multiple channels and returns enriched JobRecords using OpenAI GPT-4o.
+A headless AI-powered intake agent for field service automation that processes unstructured job data from multiple channels and returns enriched JobRecords using OpenAI GPT-4o with precision navigation and routing.
 
 ## Features
 
@@ -12,7 +11,7 @@ A headless AI-powered intake agent for field service automation that processes u
 - **Email Processing**: Email-to-job conversion (coming soon)
 - **Manual Upload**: Direct data entry through dashboard
 
-### AI-Powered Enrichment with Maya
+### AI-Powered Enrichment
 - **Service Type Classification**: AC Repair, Install, Maintenance, Heating, Other
 - **Urgency Assessment**: Low, Medium, High priority classification
 - **Issue Type Identification**: Specific problem categorization
@@ -123,17 +122,9 @@ The application is designed for Replit deployment with automatic scaling and bui
 - **Frontend**: React + TypeScript + Tailwind CSS
 - **Backend**: Express.js + TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **AI Processing**: OpenAI GPT-4o API (Maya Agent)
+- **AI Processing**: OpenAI GPT-4o API
 - **Communication**: Twilio SMS and Voice APIs
 - **Monitoring**: Built-in metrics collection and alerting
-
-## Maya - The AI Intake Agent
-
-Maya is Meridian FSM's intelligent intake agent that:
-- Analyzes unstructured customer requests
-- Classifies service types and urgency levels
-- Routes jobs to appropriate workforce systems
-- Provides intelligent field service routing decisions
 
 ## Contributing
 

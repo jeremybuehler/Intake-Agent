@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
 import { enrichJobData } from "./openai";
-import { processJobWithMaya } from "./meridian-ai";
+import { processJobWithMaya } from "./noetis-ai";
 import { workforceIntegration } from "./noetis-workforce";
 import { z } from "zod";
 import { connectionManager } from "./connection-manager";
@@ -13,28 +13,28 @@ import { registerTwilioRoutes } from "./twilio-routes";
 import { registerApiDashboardRoutes } from "./api-dashboard-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-
+  
   // Register Twilio configuration routes
   registerTwilioRoutes(app);
-
+  
   // Register API dashboard routes
   registerApiDashboardRoutes(app);
-
+  
   // Main intake endpoint
   app.post("/api/intake", async (req, res) => {
     const startTime = Date.now();
-
+    
     try {
       // Validate input
       const validatedInput = rawJobIntakeSchema.parse(req.body);
-
+      
       // Generate unique job ID
       const jobId = `job_${new Date().getFullYear()}_${String(Date.now()).slice(-6)}`;
-
+      
       // Prepare customer info for Ava's analysis
       const customerInfo = `Name: ${validatedInput.customer_name}, Phone: ${validatedInput.customer_phone}, Address: ${validatedInput.address}`;
-
-      // Process with Maya intake agent
+      
+      // Process with Maya for Meridian FSM compliance
       const meridianResult = await processJobWithMaya(
         validatedInput.description,
         customerInfo,
@@ -42,12 +42,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedInput.customer_email,
         validatedInput.address
       );
-
+      
       const processingTime = Date.now() - startTime;
-
+      
       // Record successful job processing metrics
       simpleMonitoring.recordJobSuccess(processingTime, meridianResult.confidence);
-
+      
       // Create job record for storage (maintaining backwards compatibility)
       const jobRecord = {
         job_id: jobId,
@@ -72,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store the job record
       await storage.createJobRecord(jobRecord);
 
-      // Route to appropriate Noetis workforce system
+      // Route to appropriate Meridian workforce system
       let workforceResponse = null;
       try {
         if (meridianResult.route_to === "dispatch_queue") {
@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Continue with response even if workforce routing fails
       }
 
-      // Return enhanced Noetis response with workforce routing info
+      // Return enhanced Meridian response with workforce routing info
       const enhancedResponse = {
         ...meridianResult,
         workforce_routing: {
@@ -108,12 +108,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(enhancedResponse);
 
     } catch (error) {
-      console.error("Ava processing error:", error);
-
+      console.error("Maya processing error:", error);
+      
       // Record failed job processing
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       simpleMonitoring.recordJobError(errorMessage);
-
+      
       if (error instanceof z.ZodError) {
         res.status(400).json({
           error: "Invalid input data",
@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         technicians_available: 5,
         last_updated: new Date().toISOString()
       };
-
+      
       res.json(dispatchStatus);
     } catch (error) {
       console.error("Error fetching dispatch status:", error);
@@ -161,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         conversion_rate: "68%",
         last_updated: new Date().toISOString()
       };
-
+      
       res.json(quoteStatus);
     } catch (error) {
       console.error("Error fetching quote status:", error);
@@ -172,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/workforce/test-routing", async (req, res) => {
     try {
       const { route_type } = req.body;
-
+      
       if (!route_type || !["dispatch", "quote", "fallback"].includes(route_type)) {
         return res.status(400).json({ 
           error: "Invalid route_type. Must be 'dispatch', 'quote', or 'fallback'" 
@@ -238,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       const jobs = await storage.getJobRecords(limit);
-
+      
       const formattedJobs = jobs.map(job => ({
         id: job.id,
         job_id: job.job_id,
@@ -271,11 +271,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SMS to Job converter endpoint
   app.post("/api/intake/sms", async (req, res) => {
     const startTime = Date.now();
-
+    
     try {
       // Expected SMS webhook payload (Twilio format)
       const { From: phone, Body: message, To: toNumber } = req.body;
-
+      
       if (!phone || !message) {
         res.status(400).json({
           error: "Invalid SMS payload",
@@ -286,16 +286,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse SMS content for customer info and job details
       const lines = message.split('\n').map((line: string) => line.trim()).filter(Boolean);
-
+      
       // Try to extract customer name from first line or use phone as fallback
       const customerName = lines[0]?.match(/^[A-Za-z\s]+$/) ? lines[0] : `Customer ${phone}`;
-
+      
       // Extract address - look for lines with address patterns
       const addressLine = lines.find((line: string) => 
         /\d+.*(?:st|nd|rd|th|street|ave|avenue|rd|road|dr|drive|blvd|boulevard|way|ln|lane)/i.test(line) ||
         /\d{5}/.test(line) // ZIP code pattern
       );
-
+      
       const jobRecord = {
         customer_name: customerName,
         customer_phone: phone,
@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("SMS intake processing error:", error);
-
+      
       // Return TwiML error response
       res.set('Content-Type', 'text/xml');
       res.send(`<?xml version="1.0" encoding="UTF-8"?>
@@ -357,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Phone Call (IVR) to Job converter endpoint
   app.post("/api/intake/call", async (req, res) => {
     const startTime = Date.now();
-
+    
     try {
       // Expected call webhook payload (Twilio format with transcription)
       const { 
@@ -366,7 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         CallSid: callSid,
         Caller: caller
       } = req.body;
-
+      
       if (!phone || !transcription) {
         res.status(400).json({
           error: "Invalid call payload",
@@ -377,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse transcription for customer info and job details
       const customerName = caller || `Customer ${phone}`;
-
+      
       // Try to extract address from transcription
       const addressMatch = transcription.match(/(?:address|located|at)\s+(.+?)(?:\.|,|$)/i);
       const address = addressMatch ? addressMatch[1].trim() : "Address to be confirmed";
@@ -431,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Call intake processing error:", error);
-
+      
       // Return TwiML error response
       res.set('Content-Type', 'text/xml');
       res.send(`<?xml version="1.0" encoding="UTF-8"?>
@@ -596,10 +596,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/monitoring/alerts", async (req, res) => {
     try {
       const { resolved, limit = 50 } = req.query;
-
+      
       const options: any = { limit: parseInt(limit as string) };
       if (resolved !== undefined) options.resolved = resolved === 'true';
-
+      
       const alerts = simpleMonitoring.getAlerts(options);
       res.json(alerts);
     } catch (error) {
@@ -620,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { alertId } = req.params;
       const success = simpleMonitoring.resolveAlert(alertId);
-
+      
       if (success) {
         res.json({ success: true, message: "Alert resolved successfully" });
       } else {
@@ -673,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const systemStats = await simpleMonitoring.getSystemStats();
       const healthCheck = await simpleMonitoring.performHealthCheck();
       const endpointStats = simpleMonitoring.getEndpointStats();
-
+      
       res.json({
         system: systemStats,
         health: healthCheck,
