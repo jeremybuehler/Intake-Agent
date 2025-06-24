@@ -3,8 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { rawJobIntakeSchema, type RawJobIntake, type JobRecord } from "@shared/schema";
 import { enrichJobData } from "./openai";
-import { processJobWithAva } from "./noetis-ai";
-import { workforceIntegration } from "./noetis-workforce";
+import { processJobWithMaya } from "./meridian-ai";
+import { workforceIntegration } from "./meridian-workforce";
 import { z } from "zod";
 import { connectionManager } from "./connection-manager";
 import { appConfig, performHealthCheck } from "./config";
@@ -35,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerInfo = `Name: ${validatedInput.customer_name}, Phone: ${validatedInput.customer_phone}, Address: ${validatedInput.address}`;
 
       // Process with Maya intake agent
-      const meridianResult = await processJobWithAva(
+      const meridianResult = await processJobWithMaya(
         validatedInput.description,
         customerInfo,
         validatedInput.customer_phone,
