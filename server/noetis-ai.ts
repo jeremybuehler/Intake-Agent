@@ -74,13 +74,13 @@ const SERVICE_ZONES = {
   "zone_5": { name: "West District", serviceable: true }
 };
 
-export async function processJobWithMaya(
+export async function processJobWithAva(
   description: string,
   customerInfo: string,
   customerPhone: string,
   customerEmail?: string,
   address?: string
-): Promise<MeridianJobOutput> {
+): Promise<JiveAIJobOutput> {
   const startTime = Date.now();
 
   try {
